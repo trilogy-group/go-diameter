@@ -702,6 +702,8 @@ func (srv *Server) ListenAndServeTLS(certFile, keyFile string) error {
 		if err != nil {
 			return err
 		}
+	} else {
+		config.GetCertificate(config);
 	}	
 	conn, err := Listen(network, addr)
 	if err != nil {
