@@ -13,6 +13,8 @@ import (
 	"github.com/fiorix/go-diameter/v4/diam/sm/smpeer"
 )
 
+type MessageHandler = func(diam.Conn, *diam.Message)
+
 // SupportedApp holds properties of each locally supported App
 type SupportedApp struct {
 	ID      uint32
@@ -68,6 +70,9 @@ type Settings struct {
 	//
 	// Deprecated: HostIPAddress is depreciated, use HostIPAddresses instead
 	HostIPAddress datatype.Address
+
+	// CerHook is called before processing of CER's. Modification can be made here
+	CerHook MessageHandler
 }
 
 var (
