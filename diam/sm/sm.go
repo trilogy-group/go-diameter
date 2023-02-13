@@ -76,13 +76,6 @@ var (
 	baseDWRIdx = diam.CommandIndex{AppID: 0, Code: diam.DeviceWatchdog, Request: true}
 )
 
-type RoundTripInfo struct {
-	Request    *diam.Message
-	Ans        *diam.Message // ToDo - implement in other tickets.
-	AnsError   error         // When answer could not be sent. Does not mean answer is valid
-	Connection diam.Conn
-}
-
 // StateMachine is a specialized type of diam.ServeMux that handles
 // the CER/CEA handshake and DWR/DWA messages for clients or servers.
 //
@@ -91,8 +84,7 @@ type RoundTripInfo struct {
 type StateMachine struct {
 	cfg           *Settings
 	mux           *diam.ServeMux
-	hsNotifyc     chan diam.Conn      // deprecated. handshake notifier (connections)
-	ceNotify      chan *RoundTripInfo // notifications for all CE messages
+	hsNotifyc     chan diam.Conn // handshake notifier
 	supportedApps []*SupportedApp
 }
 
@@ -105,7 +97,6 @@ func New(settings *Settings) *StateMachine {
 		cfg:           settings,
 		mux:           diam.NewServeMux(),
 		hsNotifyc:     make(chan diam.Conn),
-		ceNotify:      make(chan *RoundTripInfo),
 		supportedApps: PrepareSupportedApps(dict.Default),
 	}
 	sm.mux.Handle("CER", handleCER(sm))
@@ -166,19 +157,6 @@ func (sm *StateMachine) ErrorReports() <-chan *diam.ErrorReport {
 // HandshakeNotify implements the HandshakeNotifier interface.
 func (sm *StateMachine) HandshakeNotify() <-chan diam.Conn {
 	return sm.hsNotifyc
-}
-
-// CeNotify implements the CeNotifier interface.
-func (sm *StateMachine) CeNotify() <-chan *RoundTripInfo {
-	return sm.ceNotify
-}
-
-// The CeNotifier interface is implemented by Handlers
-// that allow getting information from peers of their CER/CEA communication
-type CeNotifier interface {
-	// CeNotify returns a channel that receives
-	// a peer's RoundTripInfo for CE communication.
-	CeNotify() <-chan *RoundTripInfo
 }
 
 // The HandshakeNotifier interface is implemented by Handlers

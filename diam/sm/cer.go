@@ -22,32 +22,13 @@ import (
 // See RFC 6733 section 5.3 for details.
 func handleCER(sm *StateMachine) diam.HandlerFunc {
 	return func(c diam.Conn, m *diam.Message) {
-		// ToDo: populate this in the next tickets.
-		var ans *diam.Message = nil
-		var err error
-
-		defer func() {
-			// Notify about the CE handling communication.
-			roundTripInfo := &RoundTripInfo{
-				Request:    m,
-				Ans:        ans,
-				AnsError:   err,
-				Connection: c,
-			}
-
-			select {
-			case sm.ceNotify <- roundTripInfo:
-			default:
-			}
-		}()
-
 		ctx := c.Context()
 		if _, ok := smpeer.FromContext(ctx); ok {
 			// Ignore retransmission.
 			return
 		}
 		cer := new(smparser.CER)
-		_, err = cer.Parse(m, smparser.Server)
+		_, err := cer.Parse(m, smparser.Server)
 		if err != nil {
 			err = errorCEA(sm, c, m, cer, err)
 			if err != nil {

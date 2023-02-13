@@ -71,68 +71,6 @@ func testHandleCER_HandshakeMetadata(t *testing.T, network string) {
 	}
 }
 
-func TestHandleCER_CeRoundTrip(t *testing.T) {
-	sm := New(serverSettings)
-	srv := diamtest.NewServerNetwork("tcp", sm, dict.Default)
-	defer srv.Close()
-
-	ceRtc := make(chan *RoundTripInfo, 1)
-	cli, err := diam.DialNetwork("tcp", srv.Addr, nil, dict.Default)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	ready := make(chan struct{})
-	go func() {
-		rtCe := <-sm.CeNotify()
-		ceRtc <- rtCe
-		close(ready)
-	}()
-
-	m := diam.NewRequest(diam.CapabilitiesExchange, 1001, dict.Default)
-	m.NewAVP(avp.OriginHost, avp.Mbit, 0, clientSettings.OriginHost)
-	m.NewAVP(avp.OriginRealm, avp.Mbit, 0, clientSettings.OriginRealm)
-	m.NewAVP(avp.HostIPAddress, avp.Mbit, 0, localhostAddress)
-	m.NewAVP(avp.VendorID, avp.Mbit, 0, clientSettings.VendorID)
-	m.NewAVP(avp.ProductName, 0, 0, clientSettings.ProductName)
-	m.NewAVP(avp.OriginStateID, avp.Mbit, 0, datatype.Unsigned32(1))
-	m.NewAVP(avp.AcctApplicationID, avp.Mbit, 0, datatype.Unsigned32(1001))
-	m.NewAVP(avp.FirmwareRevision, 0, 0, clientSettings.FirmwareRevision)
-	_, err = m.WriteTo(cli)
-	if err != nil {
-		t.Fatal(err)
-	}
-	<-ready
-
-	ceRt := <-ceRtc
-	ctx := ceRt.Connection.Context()
-	meta, ok := smpeer.FromContext(ctx)
-	if !ok {
-		t.Fatal("Handshake ok but no context/metadata found")
-	}
-	if meta.OriginHost != clientSettings.OriginHost {
-		t.Fatalf("Unexpected OriginHost. Want %q, have %q",
-			clientSettings.OriginHost, meta.OriginHost)
-	}
-	if meta.OriginRealm != clientSettings.OriginRealm {
-		t.Fatalf("Unexpected OriginRealm. Want %q, have %q",
-			clientSettings.OriginRealm, meta.OriginRealm)
-	}
-
-	if ceRt.Request.String() != m.String() {
-		t.Fatalf("Actual and recieved messages are different. actual %q, received %q",
-			ceRt.Request.String(), m.String())
-	}
-
-	if ceRt.AnsError != nil {
-		t.Fatalf("AnsError should be null. Is %q", ceRt.AnsError)
-	}
-
-	if ceRt.Ans != nil {
-		t.Fatalf("Ans should not be nil")
-	}
-}
-
 func TestHandleCER_HandshakeMetadata_CustomIP(t *testing.T) {
 	sm := New(serverSettings2)
 	srv := diamtest.NewServer(sm, dict.Default)
