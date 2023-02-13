@@ -1,4 +1,4 @@
-module github.com/fiorix/go-diameter/v4
+module github.com/trilog-group/go-diameter/v4
 
 go 1.13
 
