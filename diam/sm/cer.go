@@ -22,10 +22,6 @@ import (
 // See RFC 6733 section 5.3 for details.
 func handleCER(sm *StateMachine) diam.HandlerFunc {
 	return func(c diam.Conn, m *diam.Message) {
-		if sm.cfg.CerHook != nil {
-			sm.cfg.CerHook(c, m)
-		}
-
 		ctx := c.Context()
 		if _, ok := smpeer.FromContext(ctx); ok {
 			// Ignore retransmission.
