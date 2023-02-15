@@ -39,17 +39,11 @@ func PrepareSupportedApps(d *dict.Parser) []*SupportedApp {
 }
 
 type MessageHandlerProxy = func(diam.HandlerFunc) diam.HandlerFunc
-type MessageWriterProxy = func(diam.Conn, *diam.Message) error
 
-var defaultProxy = func(f diam.HandlerFunc) diam.HandlerFunc {
+var defaultHandlerProxy = func(f diam.HandlerFunc) diam.HandlerFunc {
 	return func(c diam.Conn, m *diam.Message) {
 		f(c, m)
 	}
-}
-
-var defaultWriterProxy = func(c diam.Conn, m *diam.Message) error {
-	_, err := m.WriteTo(c)
-	return err
 }
 
 // Settings used to configure the state machine with AVPs to be added
@@ -81,9 +75,9 @@ type Settings struct {
 	HostIPAddresses []datatype.Address
 	//
 	// Deprecated: HostIPAddress is depreciated, use HostIPAddresses instead
-	HostIPAddress   datatype.Address
-	CerHandlerProxy MessageHandlerProxy
-	CeaWriterProxy  MessageWriterProxy
+	HostIPAddress       datatype.Address
+	RequestHandlerProxy MessageHandlerProxy
+	AnswerHandlerProxy  MessageHandlerProxy
 }
 
 var (
@@ -109,11 +103,11 @@ func New(settings *Settings) *StateMachine {
 	if len(settings.HostIPAddresses) == 0 && len(settings.HostIPAddress) > 0 {
 		settings.HostIPAddresses = []datatype.Address{settings.HostIPAddress}
 	}
-	if settings.CerHandlerProxy == nil {
-		settings.CerHandlerProxy = defaultProxy
+	if settings.RequestHandlerProxy == nil {
+		settings.RequestHandlerProxy = defaultHandlerProxy
 	}
-	if settings.CeaWriterProxy == nil {
-		settings.CeaWriterProxy = defaultWriterProxy
+	if settings.AnswerHandlerProxy == nil {
+		settings.AnswerHandlerProxy = defaultHandlerProxy
 	}
 
 	sm := &StateMachine{
@@ -122,9 +116,9 @@ func New(settings *Settings) *StateMachine {
 		hsNotifyc:     make(chan diam.Conn),
 		supportedApps: PrepareSupportedApps(dict.Default),
 	}
-	sm.mux.Handle("CER", settings.CerHandlerProxy(handleCER(sm)))
+	sm.mux.Handle("CER", settings.RequestHandlerProxy(handleCER(sm)))
 	sm.mux.Handle("DWR", handshakeOK(handleDWR(sm)))
-	sm.mux.HandleIdx(baseCERIdx, settings.CerHandlerProxy(handleCER(sm)))
+	sm.mux.HandleIdx(baseCERIdx, settings.RequestHandlerProxy(handleCER(sm)))
 	sm.mux.HandleIdx(baseDWRIdx, handleDWR(sm))
 	return sm
 }

@@ -105,7 +105,9 @@ func errorCEA(sm *StateMachine, c diam.Conn, m *diam.Message, cer *smparser.CER,
 		a.NewAVP(avp.FirmwareRevision, 0, 0, sm.cfg.FirmwareRevision)
 	}
 
-	err = sm.cfg.CeaWriterProxy(c, a)
+	sm.cfg.AnswerHandlerProxy(func(conn diam.Conn, answer *diam.Message) {
+		_, err = answer.WriteTo(conn)
+	})(c, a)
 	if err != nil {
 		err = fmt.Errorf("Error CEA '%s' send failure: %v", errMessage, err)
 	}
@@ -166,5 +168,8 @@ func successCEA(sm *StateMachine, c diam.Conn, m *diam.Message, cer *smparser.CE
 		a.NewAVP(avp.FirmwareRevision, 0, 0, sm.cfg.FirmwareRevision)
 	}
 
-	return sm.cfg.CeaWriterProxy(c, a)
+	sm.cfg.AnswerHandlerProxy(func(conn diam.Conn, answer *diam.Message) {
+		_, err = answer.WriteTo(conn)
+	})(c, a)
+	return err
 }
