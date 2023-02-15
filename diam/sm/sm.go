@@ -38,12 +38,18 @@ func PrepareSupportedApps(d *dict.Parser) []*SupportedApp {
 	return locallySupportedApps
 }
 
-type HandlerProxy = func(diam.HandlerFunc) diam.HandlerFunc
+type MessageHandlerProxy = func(diam.HandlerFunc) diam.HandlerFunc
+type MessageWriterProxy = func(diam.Conn, *diam.Message) error
 
 var defaultProxy = func(f diam.HandlerFunc) diam.HandlerFunc {
 	return func(c diam.Conn, m *diam.Message) {
 		f(c, m)
 	}
+}
+
+var defaultWriterProxy = func(c diam.Conn, m *diam.Message) error {
+	_, err := m.WriteTo(c)
+	return err
 }
 
 // Settings used to configure the state machine with AVPs to be added
@@ -76,7 +82,8 @@ type Settings struct {
 	//
 	// Deprecated: HostIPAddress is depreciated, use HostIPAddresses instead
 	HostIPAddress   datatype.Address
-	CerHandlerProxy HandlerProxy
+	CerHandlerProxy MessageHandlerProxy
+	CeaWriterProxy  MessageWriterProxy
 }
 
 var (
@@ -104,6 +111,9 @@ func New(settings *Settings) *StateMachine {
 	}
 	if settings.CerHandlerProxy == nil {
 		settings.CerHandlerProxy = defaultProxy
+	}
+	if settings.CeaWriterProxy == nil {
+		settings.CeaWriterProxy = defaultWriterProxy
 	}
 
 	sm := &StateMachine{

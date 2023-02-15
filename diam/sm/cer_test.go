@@ -74,12 +74,18 @@ func testHandleCER_HandshakeMetadata(t *testing.T, network string) {
 func TestHandleCER_CerHook(t *testing.T) {
 	// Force clone hence the dereference
 	modServerSettings := *serverSettings
-	var called = false
+	var handlerCalled = false
+	var writerCalled = false
 	modServerSettings.CerHandlerProxy = func(f diam.HandlerFunc) diam.HandlerFunc {
 		return func(c diam.Conn, m *diam.Message) {
 			f(c, m)
-			called = true
+			handlerCalled = true
 		}
+	}
+	modServerSettings.CeaWriterProxy = func(c diam.Conn, m *diam.Message) error {
+		_, err := m.WriteTo(c)
+		writerCalled = true
+		return err
 	}
 
 	sm := New(&modServerSettings)
@@ -129,8 +135,11 @@ func TestHandleCER_CerHook(t *testing.T) {
 		t.Fatalf("Unexpected OriginRealm. Want %q, have %q",
 			clientSettings.OriginRealm, meta.OriginRealm)
 	}
-	if !called {
-		t.Fatalf("wrapper not called")
+	if !handlerCalled {
+		t.Fatalf("message handler proxy not called")
+	}
+	if !writerCalled {
+		t.Fatalf("message writer proxy not called")
 	}
 }
 
