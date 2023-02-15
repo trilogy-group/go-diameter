@@ -104,11 +104,14 @@ func errorCEA(sm *StateMachine, c diam.Conn, m *diam.Message, cer *smparser.CER,
 	if sm.cfg.FirmwareRevision != 0 {
 		a.NewAVP(avp.FirmwareRevision, 0, 0, sm.cfg.FirmwareRevision)
 	}
-	_, err = a.WriteTo(c)
-	if err != nil {
-		err = fmt.Errorf("Error CEA '%s' send failure: %v", errMessage, err)
-	}
-	return err
+
+	return sm.cfg.AnswerHandlerProxy(func(conn diam.Conn, answer *diam.Message) error {
+		_, err = answer.WriteTo(conn)
+		if err != nil {
+			err = fmt.Errorf("Error CEA '%s' send failure: %v", errMessage, err)
+		}
+		return err
+	})(c, a)
 }
 
 // successCEA sends a success answer indicating that the CER was successfully
@@ -164,6 +167,9 @@ func successCEA(sm *StateMachine, c diam.Conn, m *diam.Message, cer *smparser.CE
 	if sm.cfg.FirmwareRevision != 0 {
 		a.NewAVP(avp.FirmwareRevision, 0, 0, sm.cfg.FirmwareRevision)
 	}
-	_, err = a.WriteTo(c)
-	return err
+
+	return sm.cfg.AnswerHandlerProxy(func(conn diam.Conn, answer *diam.Message) error {
+		_, err = answer.WriteTo(conn)
+		return err
+	})(c, a)
 }

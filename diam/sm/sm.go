@@ -38,12 +38,11 @@ func PrepareSupportedApps(d *dict.Parser) []*SupportedApp {
 	return locallySupportedApps
 }
 
-type HandlerProxy = func(diam.HandlerFunc) diam.HandlerFunc
+type HandlerFuncProxy = func(diam.Conn, *diam.Message) error
+type MessageHandlerProxy = func(HandlerFuncProxy) HandlerFuncProxy
 
-var defaultProxy = func(f diam.HandlerFunc) diam.HandlerFunc {
-	return func(c diam.Conn, m *diam.Message) {
-		f(c, m)
-	}
+var defaultHandlerFuncProxy = func(f HandlerFuncProxy) HandlerFuncProxy {
+	return f
 }
 
 // Settings used to configure the state machine with AVPs to be added
@@ -75,8 +74,9 @@ type Settings struct {
 	HostIPAddresses []datatype.Address
 	//
 	// Deprecated: HostIPAddress is depreciated, use HostIPAddresses instead
-	HostIPAddress   datatype.Address
-	CerHandlerProxy HandlerProxy
+	HostIPAddress       datatype.Address
+	RequestHandlerProxy MessageHandlerProxy
+	AnswerHandlerProxy  MessageHandlerProxy
 }
 
 var (
@@ -102,8 +102,11 @@ func New(settings *Settings) *StateMachine {
 	if len(settings.HostIPAddresses) == 0 && len(settings.HostIPAddress) > 0 {
 		settings.HostIPAddresses = []datatype.Address{settings.HostIPAddress}
 	}
-	if settings.CerHandlerProxy == nil {
-		settings.CerHandlerProxy = defaultProxy
+	if settings.RequestHandlerProxy == nil {
+		settings.RequestHandlerProxy = defaultHandlerFuncProxy
+	}
+	if settings.AnswerHandlerProxy == nil {
+		settings.AnswerHandlerProxy = defaultHandlerFuncProxy
 	}
 
 	sm := &StateMachine{
@@ -112,9 +115,16 @@ func New(settings *Settings) *StateMachine {
 		hsNotifyc:     make(chan diam.Conn),
 		supportedApps: PrepareSupportedApps(dict.Default),
 	}
-	sm.mux.Handle("CER", settings.CerHandlerProxy(handleCER(sm)))
+
+	var cerHandlerProxy diam.HandlerFunc = func(c diam.Conn, m *diam.Message) {
+		_ = settings.RequestHandlerProxy(func(c diam.Conn, m *diam.Message) error {
+			handleCER(sm)(c, m)
+			return nil
+		})(c, m)
+	}
+	sm.mux.Handle("CER", cerHandlerProxy)
 	sm.mux.Handle("DWR", handshakeOK(handleDWR(sm)))
-	sm.mux.HandleIdx(baseCERIdx, settings.CerHandlerProxy(handleCER(sm)))
+	sm.mux.HandleIdx(baseCERIdx, cerHandlerProxy)
 	sm.mux.HandleIdx(baseDWRIdx, handleDWR(sm))
 	return sm
 }
