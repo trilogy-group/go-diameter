@@ -76,17 +76,13 @@ func TestHandleCER_CerHook(t *testing.T) {
 	modServerSettings := *serverSettings
 	var requestProxyCalled = false
 	var writerProxyCalled = false
-	modServerSettings.RequestHandlerProxy = func(f diam.HandlerFunc) diam.HandlerFunc {
-		return func(c diam.Conn, m *diam.Message) {
-			f(c, m)
-			requestProxyCalled = true
-		}
+	modServerSettings.RequestHandlerProxy = func(f HandlerFuncProxy) HandlerFuncProxy {
+		requestProxyCalled = true
+		return f
 	}
-	modServerSettings.AnswerHandlerProxy = func(f diam.HandlerFunc) diam.HandlerFunc {
-		return func(c diam.Conn, m *diam.Message) {
-			f(c, m)
-			writerProxyCalled = true
-		}
+	modServerSettings.AnswerHandlerProxy = func(f HandlerFuncProxy) HandlerFuncProxy {
+		writerProxyCalled = true
+		return f
 	}
 
 	sm := New(&modServerSettings)

@@ -38,12 +38,11 @@ func PrepareSupportedApps(d *dict.Parser) []*SupportedApp {
 	return locallySupportedApps
 }
 
-type MessageHandlerProxy = func(diam.HandlerFunc) diam.HandlerFunc
+type HandlerFuncProxy = func(diam.Conn, *diam.Message) error
+type MessageHandlerProxy = func(HandlerFuncProxy) HandlerFuncProxy
 
-var defaultHandlerProxy = func(f diam.HandlerFunc) diam.HandlerFunc {
-	return func(c diam.Conn, m *diam.Message) {
-		f(c, m)
-	}
+var defaultHandlerFuncProxy = func(f HandlerFuncProxy) HandlerFuncProxy {
+	return f
 }
 
 // Settings used to configure the state machine with AVPs to be added
@@ -104,10 +103,10 @@ func New(settings *Settings) *StateMachine {
 		settings.HostIPAddresses = []datatype.Address{settings.HostIPAddress}
 	}
 	if settings.RequestHandlerProxy == nil {
-		settings.RequestHandlerProxy = defaultHandlerProxy
+		settings.RequestHandlerProxy = defaultHandlerFuncProxy
 	}
 	if settings.AnswerHandlerProxy == nil {
-		settings.AnswerHandlerProxy = defaultHandlerProxy
+		settings.AnswerHandlerProxy = defaultHandlerFuncProxy
 	}
 
 	sm := &StateMachine{
@@ -116,9 +115,16 @@ func New(settings *Settings) *StateMachine {
 		hsNotifyc:     make(chan diam.Conn),
 		supportedApps: PrepareSupportedApps(dict.Default),
 	}
-	sm.mux.Handle("CER", settings.RequestHandlerProxy(handleCER(sm)))
+
+	var cerHandlerProxy diam.HandlerFunc = func(c diam.Conn, m *diam.Message) {
+		_ = settings.RequestHandlerProxy(func(c diam.Conn, m *diam.Message) error {
+			handleCER(sm)(c, m)
+			return nil
+		})(c, m)
+	}
+	sm.mux.Handle("CER", cerHandlerProxy)
 	sm.mux.Handle("DWR", handshakeOK(handleDWR(sm)))
-	sm.mux.HandleIdx(baseCERIdx, settings.RequestHandlerProxy(handleCER(sm)))
+	sm.mux.HandleIdx(baseCERIdx, cerHandlerProxy)
 	sm.mux.HandleIdx(baseDWRIdx, handleDWR(sm))
 	return sm
 }
