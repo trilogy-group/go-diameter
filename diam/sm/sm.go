@@ -38,6 +38,14 @@ func PrepareSupportedApps(d *dict.Parser) []*SupportedApp {
 	return locallySupportedApps
 }
 
+type HandlerProxy = func(diam.HandlerFunc) diam.HandlerFunc
+
+var defaultProxy = func(f diam.HandlerFunc) diam.HandlerFunc {
+	return func(c diam.Conn, m *diam.Message) {
+		f(c, m)
+	}
+}
+
 // Settings used to configure the state machine with AVPs to be added
 // to CER on clients or CEA on servers.
 type Settings struct {
@@ -67,7 +75,8 @@ type Settings struct {
 	HostIPAddresses []datatype.Address
 	//
 	// Deprecated: HostIPAddress is depreciated, use HostIPAddresses instead
-	HostIPAddress datatype.Address
+	HostIPAddress   datatype.Address
+	CerHandlerProxy HandlerProxy
 }
 
 var (
@@ -93,15 +102,19 @@ func New(settings *Settings) *StateMachine {
 	if len(settings.HostIPAddresses) == 0 && len(settings.HostIPAddress) > 0 {
 		settings.HostIPAddresses = []datatype.Address{settings.HostIPAddress}
 	}
+	if settings.CerHandlerProxy == nil {
+		settings.CerHandlerProxy = defaultProxy
+	}
+
 	sm := &StateMachine{
 		cfg:           settings,
 		mux:           diam.NewServeMux(),
 		hsNotifyc:     make(chan diam.Conn),
 		supportedApps: PrepareSupportedApps(dict.Default),
 	}
-	sm.mux.Handle("CER", handleCER(sm))
+	sm.mux.Handle("CER", settings.CerHandlerProxy(handleCER(sm)))
 	sm.mux.Handle("DWR", handshakeOK(handleDWR(sm)))
-	sm.mux.HandleIdx(baseCERIdx, handleCER(sm))
+	sm.mux.HandleIdx(baseCERIdx, settings.CerHandlerProxy(handleCER(sm)))
 	sm.mux.HandleIdx(baseDWRIdx, handleDWR(sm))
 	return sm
 }

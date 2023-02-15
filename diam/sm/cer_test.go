@@ -71,6 +71,69 @@ func testHandleCER_HandshakeMetadata(t *testing.T, network string) {
 	}
 }
 
+func TestHandleCER_CerHook(t *testing.T) {
+	// Force clone hence the dereference
+	modServerSettings := *serverSettings
+	var called = false
+	modServerSettings.CerHandlerProxy = func(f diam.HandlerFunc) diam.HandlerFunc {
+		return func(c diam.Conn, m *diam.Message) {
+			f(c, m)
+			called = true
+		}
+	}
+
+	sm := New(&modServerSettings)
+
+	srv := diamtest.NewServerNetwork("tcp", sm, dict.Default)
+	defer srv.Close()
+
+	hsc := make(chan diam.Conn, 1)
+	cli, err := diam.DialNetwork("tcp", srv.Addr, nil, dict.Default)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ready := make(chan struct{})
+	go func() {
+		c := <-sm.HandshakeNotify()
+		hsc <- c
+		close(ready)
+	}()
+
+	m := diam.NewRequest(diam.CapabilitiesExchange, 1001, dict.Default)
+	m.NewAVP(avp.OriginHost, avp.Mbit, 0, clientSettings.OriginHost)
+	m.NewAVP(avp.OriginRealm, avp.Mbit, 0, clientSettings.OriginRealm)
+	m.NewAVP(avp.HostIPAddress, avp.Mbit, 0, localhostAddress)
+	m.NewAVP(avp.VendorID, avp.Mbit, 0, clientSettings.VendorID)
+	m.NewAVP(avp.ProductName, 0, 0, clientSettings.ProductName)
+	m.NewAVP(avp.OriginStateID, avp.Mbit, 0, datatype.Unsigned32(1))
+	m.NewAVP(avp.AcctApplicationID, avp.Mbit, 0, datatype.Unsigned32(1001))
+	m.NewAVP(avp.FirmwareRevision, 0, 0, clientSettings.FirmwareRevision)
+	_, err = m.WriteTo(cli)
+	if err != nil {
+		t.Fatal(err)
+	}
+	<-ready
+
+	c := <-hsc
+	ctx := c.Context()
+	meta, ok := smpeer.FromContext(ctx)
+	if !ok {
+		t.Fatal("Handshake ok but no context/metadata found")
+	}
+	if meta.OriginHost != clientSettings.OriginHost {
+		t.Fatalf("Unexpected OriginHost. Want %q, have %q",
+			clientSettings.OriginHost, meta.OriginHost)
+	}
+	if meta.OriginRealm != clientSettings.OriginRealm {
+		t.Fatalf("Unexpected OriginRealm. Want %q, have %q",
+			clientSettings.OriginRealm, meta.OriginRealm)
+	}
+	if !called {
+		t.Fatalf("wrapper not called")
+	}
+}
+
 func TestHandleCER_HandshakeMetadata_CustomIP(t *testing.T) {
 	sm := New(serverSettings2)
 	srv := diamtest.NewServer(sm, dict.Default)
