@@ -122,10 +122,16 @@ func New(settings *Settings) *StateMachine {
 			return nil
 		})(c, m)
 	}
+	var dwrHandlerProxy diam.HandlerFunc = func(c diam.Conn, m *diam.Message) {
+		_ = settings.RequestHandlerProxy(func(c diam.Conn, m *diam.Message) error {
+			handleDWR(sm)(c, m)
+			return nil
+		})(c, m)
+	}
 	sm.mux.Handle("CER", cerHandlerProxy)
-	sm.mux.Handle("DWR", handshakeOK(handleDWR(sm)))
+	sm.mux.Handle("DWR", handshakeOK(dwrHandlerProxy))
 	sm.mux.HandleIdx(baseCERIdx, cerHandlerProxy)
-	sm.mux.HandleIdx(baseDWRIdx, handleDWR(sm))
+	sm.mux.HandleIdx(baseDWRIdx, dwrHandlerProxy)
 	return sm
 }
 
