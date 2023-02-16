@@ -86,6 +86,7 @@ func TestHandleDWRWithMessageHandlers(t *testing.T) {
 	var requestProxyCalledForCER = false
 	var requestProxyCalledForCEA = false
 	var requestProxyCalledForDWR = false
+	var requestProxyCalledForDWA = false
 	modServerSettings.RequestHandlerProxy = func(f HandlerFuncProxy) HandlerFuncProxy {
 		return func(c diam.Conn, m *diam.Message) error {
 			if m.Header.CommandCode == diam.CapabilitiesExchange {
@@ -101,6 +102,9 @@ func TestHandleDWRWithMessageHandlers(t *testing.T) {
 		return func(c diam.Conn, m *diam.Message) error {
 			if m.Header.CommandCode == diam.CapabilitiesExchange {
 				requestProxyCalledForCEA = true
+			}
+			if m.Header.CommandCode == diam.DeviceWatchdog {
+				requestProxyCalledForDWA = true
 			}
 			return f(c, m)
 		}
@@ -167,7 +171,10 @@ func TestHandleDWRWithMessageHandlers(t *testing.T) {
 			t.Fatalf("Unexpected result code for DWA.\n%s", resp)
 		}
 		if !requestProxyCalledForDWR {
-			t.Fatalf("answer handler proxy not called for DWR")
+			t.Fatalf("request handler proxy not called for DWR")
+		}
+		if !requestProxyCalledForDWA {
+			t.Fatalf("answer handler proxy not called for DWA")
 		}
 	case err := <-mux.ErrorReports():
 		t.Fatal(err)
