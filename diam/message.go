@@ -64,19 +64,19 @@ func readerBufferSlice(buf *bytes.Buffer, l int) []byte {
 
 // ReadMessage reads a binary stream from the reader and uses the given
 // dictionary to parse it.
-func ReadMessage(reader io.Reader, dictionary *dict.Parser) (*Message, error) {
+func ReadMessage(reader io.Reader, dictionary *dict.Parser, hook *HeaderReaderHook) (*Message, *string, error) {
 	buf := newReaderBuffer()
 	defer putReaderBuffer(buf)
 	m := &Message{dictionary: dictionary}
-	cmd, stream, err := m.readHeader(reader, buf)
+	cmd, stream, endpointId, err := m.readHeader(reader, buf, hook)
 	if err != nil {
-		return nil, err
+		return nil, endpointId, err
 	}
 	m.stream = stream
 	if err = m.readBody(reader, buf, cmd, stream); err != nil {
-		return nil, err
+		return nil, endpointId, err
 	}
-	return m, nil
+	return m, endpointId, nil
 }
 
 // MessageStream returns the stream #, the message was received on (when applicable)
@@ -84,7 +84,14 @@ func (m *Message) MessageStream() uint {
 	return m.stream
 }
 
-func (m *Message) readHeader(r io.Reader, buf *bytes.Buffer) (cmd *dict.Command, stream uint, err error) {
+func (m *Message) readHeader(r io.Reader, buf *bytes.Buffer, hook *HeaderReaderHook) (cmd *dict.Command, stream uint, endpointId *string, err error) {
+	if (hook != nil) {
+		endpointId, err = (*hook)(r)
+		if err != nil {
+			return nil, stream, nil, err
+		}
+	}
+
 	b := buf.Bytes()[:HeaderLength]
 	msr, isMulti := r.(MultistreamReader)
 	if isMulti {
@@ -96,20 +103,21 @@ func (m *Message) readHeader(r io.Reader, buf *bytes.Buffer) (cmd *dict.Command,
 		_, err = io.ReadFull(r, b)
 	}
 	if err != nil {
-		return nil, stream, err
+		return nil, stream, nil, err
 	}
+
 	m.Header, err = DecodeHeader(b)
 	if err != nil {
-		return nil, stream, err
+		return nil, stream, endpointId, err
 	}
 	cmd, err = m.Dictionary().FindCommand(
 		m.Header.ApplicationID,
 		m.Header.CommandCode,
 	)
 	if err != nil {
-		return nil, stream, err
+		return nil, stream, endpointId, err
 	}
-	return cmd, stream, nil
+	return cmd, stream, endpointId, nil
 }
 
 func (m *Message) readBody(r io.Reader, buf *bytes.Buffer, cmd *dict.Command, stream uint) error {

@@ -43,6 +43,7 @@ type Conn interface {
 	Context() context.Context                       // Returns the internal context
 	SetContext(ctx context.Context)                 // Stores a new context
 	Connection() net.Conn                           // Returns network connection
+	ProxyHeaderVpcEndpointId() *string							// Returns the VPC Endpoint ID fetched by the header hook
 }
 
 // The CloseNotifier interface is implemented by Conns which
@@ -87,9 +88,10 @@ type conn struct {
 	tlsState *tls.ConnectionState // or nil when not using TLS
 	writer   *response            // the diam.Conn exposed to handlers
 
-	mu           sync.Mutex // guards the following
-	closeNotifyc chan struct{}
-	clientGone   bool
+	mu            sync.Mutex // guards the following
+	closeNotifyc  chan struct{}
+	clientGone    bool
+	vpcEndpointId *string					// the AWS VPC endpoint ID extracted from the proxy header
 }
 
 func (c *conn) closeNotify() <-chan struct{} {
@@ -165,13 +167,14 @@ func (c *conn) readMessage() (m *Message, err error) {
 	if msc, isMulti := c.rwc.(MultistreamConn); isMulti {
 		// If it's a multi-stream association - reset the stream to "undefined" prior to reading next message
 		msc.ResetCurrentStream()
-		m, err = ReadMessage(msc, c.dictionary()) // MultistreamConn has it's own buffering
+		m, vpcEndpointId, err = ReadMessage(msc, c.dictionary(), c.server.HeaderHook) // MultistreamConn has it's own buffering
 	} else {
-		m, err = ReadMessage(c.buf.Reader, c.dictionary())
+		m, vpcEndpointId, err = ReadMessage(c.buf.Reader, c.dictionary(), c.server.HeaderHook)
 	}
 	if err != nil {
 		return nil, err
 	}
+	c.vpcEndpointId = vpcEndpointId
 	return m, nil
 }
 
@@ -336,6 +339,10 @@ func (w *response) SetContext(ctx context.Context) {
 
 func (w *response) Connection() net.Conn {
 	return w.conn.rwc
+}
+
+func (w *response) ProxyHeaderVpcEndpointId() *string {
+	return w.conn.vpcEndpointId
 }
 
 // The HandlerFunc type is an adapter to allow the use of
@@ -557,6 +564,8 @@ func Serve(l net.Listener, handler Handler) error {
 	return srv.Serve(l)
 }
 
+type HeaderReaderHook = func(io.Reader) (*string, error)
+
 // A Server defines parameters for running a diameter server.
 type Server struct {
 	Network      string        // network of the address - empty string defaults to tcp
@@ -567,7 +576,8 @@ type Server struct {
 	WriteTimeout time.Duration // maximum duration before timing out write of the response
 	TLSConfig    *tls.Config   // optional TLS config, used by ListenAndServeTLS
 	LocalAddr    net.Addr      // optional Local Address to bind dailer's (Dail...) socket to
-}
+	HeaderHook
+}/
 
 // serverHandler delegates to either the server's Handler or DefaultServeMux.
 type serverHandler struct {
