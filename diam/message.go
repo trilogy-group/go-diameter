@@ -64,10 +64,15 @@ func readerBufferSlice(buf *bytes.Buffer, l int) []byte {
 
 // ReadMessage reads a binary stream from the reader and uses the given
 // dictionary to parse it.
-func ReadMessage(reader io.Reader, dictionary *dict.Parser) (*Message, error) {
+func ReadMessage(reader io.Reader, dictionary *dict.Parser, hook func(*Message) error) (*Message, error) {
 	buf := newReaderBuffer()
 	defer putReaderBuffer(buf)
 	m := &Message{dictionary: dictionary}
+
+	if err := hook(m); err != nil {
+		return nil, err
+	}
+
 	cmd, stream, err := m.readHeader(reader, buf)
 	if err != nil {
 		return nil, err
@@ -98,6 +103,7 @@ func (m *Message) readHeader(r io.Reader, buf *bytes.Buffer) (cmd *dict.Command,
 	if err != nil {
 		return nil, stream, err
 	}
+
 	m.Header, err = DecodeHeader(b)
 	if err != nil {
 		return nil, stream, err
