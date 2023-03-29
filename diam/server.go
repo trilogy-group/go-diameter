@@ -164,6 +164,10 @@ func (c *conn) readMessage() (m *Message, err error) {
 	}
 
 	wrappedMethod := func(m *Message) error {
+		if c.server.ReadMessageHook == nil {
+			return nil
+		}
+
 		return c.server.ReadMessageHook(c.writer, m)
 	}
 
@@ -566,15 +570,15 @@ type ReadMessageHook = func(Conn, *Message) error
 
 // A Server defines parameters for running a diameter server.
 type Server struct {
-	Network         string        // network of the address - empty string defaults to tcp
-	Addr            string        // address to listen on, ":3868" if empty
-	Handler         Handler       // handler to invoke, DefaultServeMux if nil
-	Dict            *dict.Parser  // diameter dictionaries for this server
-	ReadTimeout     time.Duration // maximum duration before timing out read of the request
-	WriteTimeout    time.Duration // maximum duration before timing out write of the response
-	TLSConfig       *tls.Config   // optional TLS config, used by ListenAndServeTLS
-	LocalAddr       net.Addr      // optional Local Address to bind dailer's (Dail...) socket to
-	ReadMessageHook ReadMessageHook
+	Network         string          // network of the address - empty string defaults to tcp
+	Addr            string          // address to listen on, ":3868" if empty
+	Handler         Handler         // handler to invoke, DefaultServeMux if nil
+	Dict            *dict.Parser    // diameter dictionaries for this server
+	ReadTimeout     time.Duration   // maximum duration before timing out read of the request
+	WriteTimeout    time.Duration   // maximum duration before timing out write of the response
+	TLSConfig       *tls.Config     // optional TLS config, used by ListenAndServeTLS
+	LocalAddr       net.Addr        // optional Local Address to bind dailer's (Dail...) socket to
+	ReadMessageHook ReadMessageHook // optional Called right before ReadMessage method.
 }
 
 // serverHandler delegates to either the server's Handler or DefaultServeMux.
