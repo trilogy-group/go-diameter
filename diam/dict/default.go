@@ -2543,11 +2543,7 @@ var tgpprorfXML = `<?xml version="1.0" encoding="UTF-8"?>
 			</data>
 		</avp>
 
-		<avp name="Cellular-Network-Information" code="3924" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
-			<data type="OctetString" />
-		</avp>
-
-		<avp name="Inter-UE-Transfer" code="3902" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
+		<avp name="Inter-UE-Transfer" code="3902" must="V,M" may="-" must-not="-" may-encrypt="N" vendor-id="10415">
 			<data type="Enumerated">
 				<item code="0" name="Intra-UE transfer"/>
 				<item code="1" name="Inter-UE transfer"/>
