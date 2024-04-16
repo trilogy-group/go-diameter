@@ -3200,6 +3200,8 @@ var tgpprorfXML = `<?xml version="1.0" encoding="UTF-8"?>
 				<rule avp="Route-Header-Transmitted" required="false" max="1"/>
 				<rule avp="Instance-Id" required="false" max="1"/>
 				<rule avp="TAD-Identifier" required="false" max="1"/>
+				<rule avp="FE-Identifier-List" required="false" max="1"/>
+				<rule avp="Cellular-Network-Information" required="false" max="1"/>
 			</data>
 		</avp>
 
@@ -4675,6 +4677,14 @@ var tgpprorfXML = `<?xml version="1.0" encoding="UTF-8"?>
 				<item code="0" name="CS"/>
 				<item code="1" name="PS"/>
 			</data>
+		</avp>
+
+		<avp name="FE-Identifier-List" code="4413" must="V,M"	may="-" must-not="-" may-encrypt="N" vendor-id="10415">
+			<data type="UTF8String"/>
+		</avp>
+
+		<avp name="Cellular-Network-Information" code="3924" must="V,M" may="-" must-not="-" may-encrypt="N" vendor-id="10415">
+			<data type="OctetString"/>
 		</avp>
 
 		<avp name="Talk-Burst-Exchange" code="1255" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
