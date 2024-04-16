@@ -2533,6 +2533,28 @@ var tgpprorfXML = `<?xml version="1.0" encoding="UTF-8"?>
 			<data type="Grouped">
 				<rule avp="Access-Transfer-Type" required="false" max="1"/>
 				<rule avp="Access-Network-Information" required="false" max="1"/>
+				<rule avp="Cellular-Network-Information" required="false" max="1"/>
+				<rule avp="Inter-UE-Transfer" required="false" max="1"/>
+				<rule avp="User-Equipment-Info" required="false" max="1"/>
+				<rule avp="Instance-Id" required="false" max="1"/>
+				<rule avp="Related-IMS-Charging-Identifier" required="false" max="1"/>
+				<rule avp="Related-IMS-Charging-Identifier-Node" required="false" max="1"/>
+				<rule avp="Change-Time" required="false" max="1"/>
+			</data>
+		</avp>
+
+		<avp name="Inter-UE-Transfer" code="3902" must="V,M" may="-" must-not="-" may-encrypt="N" vendor-id="10415">
+			<data type="Enumerated">
+				<item code="0" name="Intra-UE transfer"/>
+				<item code="1" name="Inter-UE transfer"/>
+			</data>
+		</avp>
+
+		<avp name="Access-Network-Info-Change" code="4401" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
+			<data type="Grouped">
+				<rule avp="Access-Network-Information" required="false" max="1"/>
+				<rule avp="Cellular-Network-Information" required="false" max="1"/>
+				<rule avp="Change-Time" required="false" max="1"/>
 			</data>
 		</avp>
 
@@ -3167,12 +3189,15 @@ var tgpprorfXML = `<?xml version="1.0" encoding="UTF-8"?>
 				<rule avp="IMS-Emergency-Indicator" required="false" max="1"/>
 				<rule avp="IMS-Visited-Network-Identifier" required="false" max="1"/>
 				<rule avp="Access-Transfer-Information" required="false"/>
+				<rule avp="Access-Network-Info-Change" required="false"/>
 				<rule avp="Related-IMS-Charging-Identifier" required="false" max="1"/>
 				<rule avp="Related-IMS-Charging-Identifier-Node" required="false" max="1"/>
 				<rule avp="Route-Header-Received" required="false" max="1"/>
 				<rule avp="Route-Header-Transmitted" required="false" max="1"/>
 				<rule avp="Instance-Id" required="false" max="1"/>
 				<rule avp="TAD-Identifier" required="false" max="1"/>
+				<rule avp="FE-Identifier-List" required="false" max="1"/>
+				<rule avp="Cellular-Network-Information" required="false" max="1"/>
 			</data>
 		</avp>
 
@@ -4648,6 +4673,14 @@ var tgpprorfXML = `<?xml version="1.0" encoding="UTF-8"?>
 				<item code="0" name="CS"/>
 				<item code="1" name="PS"/>
 			</data>
+		</avp>
+
+		<avp name="FE-Identifier-List" code="4413" must="V,M"	may="-" must-not="-" may-encrypt="N" vendor-id="10415">
+			<data type="UTF8String"/>
+		</avp>
+
+		<avp name="Cellular-Network-Information" code="3924" must="V,M" may="-" must-not="-" may-encrypt="N" vendor-id="10415">
+			<data type="OctetString"/>
 		</avp>
 
 		<avp name="Talk-Burst-Exchange" code="1255" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
@@ -7827,4 +7860,4 @@ var tgpprxXML = `<?xml version="1.0" encoding="UTF-8"?>
             		<data type="OctetString"/>
        </avp>
 	</application>
-</diameter>`	
+</diameter>`
