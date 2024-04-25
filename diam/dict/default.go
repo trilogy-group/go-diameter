@@ -3144,6 +3144,16 @@ var tgpprorfXML = `<?xml version="1.0" encoding="UTF-8"?>
 			</data>
 		</avp>
 
+		<avp name="Called-Identity" code="3916" must="V,M" may-encrypt="N" vendor-id="10415">
+			<data type="UTF8String"/>
+		</avp>
+		<avp name="Called-Identity-Change" code="3917" must="V,M" may-encrypt="N" vendor-id="10415">
+			<data type="Grouped">
+				<rule avp="Called-Identity" required="false" max="1"/>
+				<rule avp="Change-Time" required="false" max="1"/>
+			</data>
+		</avp>
+
 		<avp name="IMS-Information" code="876" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
 			<data type="Grouped">
 				<rule avp="Event-Type" required="false" max="1"/>
@@ -3155,6 +3165,7 @@ var tgpprorfXML = `<?xml version="1.0" encoding="UTF-8"?>
 				<rule avp="Calling-Party-Address" required="false"/>
 				<rule avp="Called-Party-Address" required="false" max="1"/>
 				<rule avp="Called-Asserted-Identity" required="false"/>
+				<rule avp="Called-Identity-Change" required="false"/>
 				<rule avp="Number-Portability-Routing-Information" required="false" max="1"/>
 				<rule avp="Carrier-Select-Routing-Information" required="false" max="1"/>
 				<rule avp="Alternate-Charged-Party-Address" required="false" max="1"/>
@@ -3169,7 +3180,7 @@ var tgpprorfXML = `<?xml version="1.0" encoding="UTF-8"?>
 				<rule avp="SDP-Media-Component" required="false"/>
 				<rule avp="Served-Party-IP-Address" required="false" max="1"/>
 				<rule avp="Server-Capabilities" required="false" max="1"/>
-				<rule avp="Trunk-Group-Id" required="false" max="1"/>
+				<rule avp="Trunk-Group-ID" required="false" max="1"/>
 				<rule avp="Bearer-Service" required="false" max="1"/>
 				<rule avp="Service-Id" required="false" max="1"/>
 				<rule avp="Service-Specific-Info" required="false"/>
@@ -4874,10 +4885,10 @@ var tgpprorfXML = `<?xml version="1.0" encoding="UTF-8"?>
 			</data>
 		</avp>
 
-		<avp name="Trunk-Group-Id" code="851" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
+		<avp name="Trunk-Group-ID" code="851" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
 			<data type="Grouped">
-				<rule avp="Incoming-Trunk-Group-Id" required="false" max="1"/>
-				<rule avp="Outgoing-Trunk-Group-Id" required="false" max="1"/>
+				<rule avp="Incoming-Trunk-Group-ID" required="false" max="1"/>
+				<rule avp="Outgoing-Trunk-Group-ID" required="false" max="1"/>
 			</data>
 		</avp>
 
