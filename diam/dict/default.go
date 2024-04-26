@@ -3223,7 +3223,7 @@ var tgpprorfXML = `<?xml version="1.0" encoding="UTF-8"?>
 			</data>
 		</avp>
 
-		<avp name="Incoming-Trunk-Group-Id" code="852" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
+		<avp name="Incoming-Trunk-Group-ID" code="852" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
 			<data type="UTF8String"/>
 		</avp>
 
@@ -3795,7 +3795,7 @@ var tgpprorfXML = `<?xml version="1.0" encoding="UTF-8"?>
 			<data type="UTF8String"/>
 		</avp>
 
-		<avp name="Outgoing-Trunk-Group-Id" code="853" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
+		<avp name="Outgoing-Trunk-Group-ID" code="853" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
 			<data type="UTF8String"/>
 		</avp>
 
