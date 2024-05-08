@@ -1081,31 +1081,31 @@ var diametersyXML = `<?xml version="1.0" encoding="UTF-8"?>
 			</data>
 		</avp>
 		
-		<avp name="Policy-Counter-Status-Report" code="2903" must="M" may="P" must="V" may-encrypt="-" vendor-id="10415">
+		<avp name="Policy-Counter-Status-Report" code="2903" must="M" may="P" must-not="V" may-encrypt="-" vendor-id="10415">
 			<data type="Grouped">
 				<rule avp="Policy-Counter-Identifier" required="true" max="1"/>
 				<rule avp="Policy-Counter-Status" required="true" max="1"/>
 				<rule avp="Pending-Policy-Counter-Information" required="false"/>
 			</data>
 		</avp>
-		<avp name="Pending-Policy-Counter-Information" code="2905 " must="M" may="P" must="V" may-encrypt="-" vendor-id="10415">
+		<avp name="Pending-Policy-Counter-Information" code="2905 " must="M" may="P" must-not="V" may-encrypt="-" vendor-id="10415">
 			<data type="Grouped">
 				<rule avp="Policy-Counter-Status" required="true" max="1"/>
 				<rule avp="Pending-Policy-Counter-Change-Time" required="true" max="1"/>
 			</data>
 		</avp>
 
-		<avp name="Pending-Policy-Counter-Change-Time" code="2901" must="M" may="P" must="V" may-encrypt="-" vendor-id="10415">
+		<avp name="Pending-Policy-Counter-Change-Time" code="2901" must="M" may="P" must-not="V" may-encrypt="-" vendor-id="10415">
 			<data type="Time"/>
 		</avp>
-		<avp name="Policy-Counter-Identifier" code="2901" must="M" may="P" must="V" may-encrypt="-" vendor-id="10415">
+		<avp name="Policy-Counter-Identifier" code="2901" must="M" may="P" must-not="V" may-encrypt="-" vendor-id="10415">
 			<data type="UTF8String"/>
 		</avp>
-		<avp name="Policy-Counter-Status" code="2902" must="M" may="P" must="V" may-encrypt="-" vendor-id="10415">
+		<avp name="Policy-Counter-Status" code="2902" must="M" may="P" must-not="V" may-encrypt="-" vendor-id="10415">
 			<data type="UTF8String"/>
 		</avp>
 
-		<avp name="SL-Request-Type" code="2904" must="M" may="P" must="V" may-encrypt="-" vendor-id="10415">
+		<avp name="SL-Request-Type" code="2904" must="M" may="P" must-not="V" may-encrypt="-" vendor-id="10415">
 			<data type="Enumerated">
 				<item code="0" name="INITIAL_REQUEST"/>
 				<item code="1" name="INTERMEDIATE_REQUEST"/>
