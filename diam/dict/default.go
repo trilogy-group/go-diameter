@@ -1022,6 +1022,7 @@ var creditcontrolXML = `<?xml version="1.0" encoding="UTF-8"?>
 	</application>
 </diameter>`
 
+// AI-GEN START - Cursor with GPT
 var diametersyXML = `<?xml version="1.0" encoding="UTF-8"?>
 <diameter>
 
@@ -1046,6 +1047,7 @@ var diametersyXML = `<?xml version="1.0" encoding="UTF-8"?>
 				<rule avp="Proxy-Info" required="false" max="1"/>
 				<rule avp="Route-Record" required="false" max="1"/>
 				<rule avp="Service-Information" required="false" max="1"/>
+				<rule avp="Policy-Counter-Status-Report" required="false" max="1"/>
 			</request>
 			<answer>
 				<!-- http://tools.ietf.org/html/rfc4006#section-3.2 -->
@@ -1060,16 +1062,75 @@ var diametersyXML = `<?xml version="1.0" encoding="UTF-8"?>
 				<rule avp="Proxy-Info" required="false" max="1"/>
 				<rule avp="Route-Record" required="false" max="1"/>
 				<rule avp="Failed-AVP" required="false" max="1"/>
+				<rule avp="Policy-Counter-Status-Report" required="false" max="1"/>
 			</answer>
 		</command>
 
-		<avp name="SL-Request-Type" code="2904" must="M" may="P" must-not="V" may-encrypt="-">
+		<command code="8388636" short="SN" name="Spending-Status-Notification">
+			<request>
+				<rule avp="Policy-Counter-Status-Report" required="false" max="1"/>
+			</request>
+			<answer>
+				<rule avp="Policy-Counter-Status-Report" required="false" max="1"/>
+			</answer>
+		</command>
+
+		<avp name="Provider-Id" code="10001" must="M" may="P" must-not="V" may-encrypt="-">
+			<data type="OctetString">
+			</data>
+		</avp>
+		
+		<avp name="Policy-Counter-Status-Report" code="2903" must="M" may="P" must="V" may-encrypt="-" vendor-id="10415">
+			<data type="Grouped">
+				<rule avp="Policy-Counter-Identifier" required="true" max="1"/>
+				<rule avp="Policy-Counter-Status" required="true" max="1"/>
+				<rule avp="Pending-Policy-Counter-Information" required="false"/>
+			</data>
+		</avp>
+		<avp name="Pending-Policy-Counter-Information" code="2905 " must="M" may="P" must="V" may-encrypt="-" vendor-id="10415">
+			<data type="Grouped">
+				<rule avp="Policy-Counter-Status" required="true" max="1"/>
+				<rule avp="Pending-Policy-Counter-Change-Time" required="true" max="1"/>
+			</data>
+		</avp>
+
+		<avp name="Pending-Policy-Counter-Change-Time" code="2901" must="M" may="P" must="V" may-encrypt="-" vendor-id="10415">
+			<data type="Time"/>
+		</avp>
+		<avp name="Policy-Counter-Identifier" code="2901" must="M" may="P" must="V" may-encrypt="-" vendor-id="10415">
+			<data type="UTF8String"/>
+		</avp>
+		<avp name="Policy-Counter-Status" code="2902" must="M" may="P" must="V" may-encrypt="-" vendor-id="10415">
+			<data type="UTF8String"/>
+		</avp>
+
+		<avp name="SL-Request-Type" code="2904" must="M" may="P" must="V" may-encrypt="-" vendor-id="10415">
 			<data type="Enumerated">
 				<item code="0" name="INITIAL_REQUEST"/>
 				<item code="1" name="INTERMEDIATE_REQUEST"/>
 			</data>
 		</avp>
 		
+		<avp name="Subscription-Id" code="443" must="M" may="P" must-not="V" may-encrypt="Y">
+			<!-- http://tools.ietf.org/html/rfc4006#section-8.46-->
+			<data type="Grouped">
+				<rule avp="Subscription-Id-Type" required="true" max="1"/>
+				<rule avp="Subscription-Id-Data" required="true" max="1"/>
+			</data>
+		</avp>
+		<avp name="Subscription-Id-Data" code="444" must="M" may="P" must-not="V" may-encrypt="Y">
+			<!-- http://tools.ietf.org/html/rfc4006#section-8.48-->
+			<data type="UTF8String"/>
+		</avp>
+		<avp name="Subscription-Id-Type" code="450" must="M" may="P" must-not="V" may-encrypt="Y">
+			<!-- http://tools.ietf.org/html/rfc4006#section-8.47-->
+			<data type="Enumerated">
+				<item code="0" name="END_USER_E164"/>
+				<item code="1" name="END_USER_IMSI"/>
+				<item code="2" name="END_USER_SIP_URI"/>
+				<item code="3" name="END_USER_NAI"/>
+			</data>
+		</avp>
     </application>
 </diameter>`
 
