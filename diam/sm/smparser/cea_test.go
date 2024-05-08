@@ -162,6 +162,22 @@ func TestCEA(t *testing.T) {
 			t.Fatalf("Unexpected app ID. Want 4, have %d", app[0])
 		}
 	}
+	if len(cea.AuthApplicationID) != 1 {
+		t.Fatalf("Unexpected length of Auth-Application-ID. Want 1, have %d", len(cea.AuthApplicationID))
+	}
+	authApplicationId, _ := cea.AuthApplicationID[0].Data.(datatype.Unsigned32)
+	if authApplicationId != 4 {
+		t.Fatalf("Unexpected value for Auth-Application-ID. Want 4, have %d", *cea.AuthApplicationID[0])
+	}
+	if len(cea.VendorSpecificApplicationID) != 0 {
+		t.Fatalf("Unexpected length of Vendor-Specific-Application-ID. Want 0, have %d", len(cea.VendorSpecificApplicationID))
+	}
+	if cea.VendorID != 0 {
+		t.Fatalf("Unexpected Vendor-ID. Want 0, have %d", cea.VendorID)
+	}
+	if cea.ProductName != "totogi-ccab" {
+		t.Fatalf("Unexpected Product-Name. Want totogi-ccab, have %s", cea.ProductName)
+	}
 }
 
 // TestCommonAppIdCEA tests that at least one CEA AppID exist in the default dictionary
@@ -258,6 +274,46 @@ func TestCommonAppIdCEA(t *testing.T) {
 			t.Fatalf("Unexpected app ID. Want 4, have %d", app[0])
 		}
 	}
+	// AI-GEN START - Github Copilot (copy-paste)
+	if len(cea.AuthApplicationID) != 1 {
+		t.Fatalf("Unexpected length of Auth-Application-ID. Want 1, have %d", len(cea.AuthApplicationID))
+	}
+	authApplicationId, _ := cea.AuthApplicationID[0].Data.(datatype.Unsigned32)
+	if authApplicationId != 4 {
+		t.Fatalf("Unexpected value for Auth-Application-ID. Want 4, have %d", *cea.AuthApplicationID[0])
+	}
+	if len(cea.VendorSpecificApplicationID) != 2 {
+		t.Fatalf("Unexpected length of Vendor-Specific-Application-ID. Want 2, have %d", len(cea.VendorSpecificApplicationID))
+	}
+	// AI-GEN END - Github Copilot (copy-paste)
+	// AI-GEN START - Cursor and GPT4
+	grouped1, _ := cea.VendorSpecificApplicationID[0].Data.(*diam.GroupedAVP)
+	vendorId1, _ := grouped1.AVP[0].Data.(datatype.Unsigned32)
+	if vendorId1 != 10415 {
+		t.Fatalf("Unexpected value for Vendor-ID. Want 10415, have %d", vendorId1)
+	}
+	authApplicationId1, _ := grouped1.AVP[1].Data.(datatype.Unsigned32)
+	if authApplicationId1 != 4 {
+		t.Fatalf("Unexpected value for Auth-Application-ID. Want 4, have %d", authApplicationId1)
+	}
+	grouped2, _ := cea.VendorSpecificApplicationID[1].Data.(*diam.GroupedAVP)
+	vendorId2, _ := grouped2.AVP[0].Data.(datatype.Unsigned32)
+	if vendorId2 != 10415 {
+		t.Fatalf("Unexpected value for Vendor-ID. Want 10415, have %d", vendorId2)
+	}
+	authApplicationId2, _ := grouped2.AVP[1].Data.(datatype.Unsigned32)
+	if authApplicationId2 != 16777302 {
+		t.Fatalf("Unexpected value for Auth-Application-ID. Want 16777302, have %d", authApplicationId2)
+	}
+	// AI-GEN END - Cursor and GPT4
+	// AI-GEN START - Github Copilot (copy-paste)
+	if cea.VendorID != 0 {
+		t.Fatalf("Unexpected Vendor-ID. Want 0, have %d", cea.VendorID)
+	}
+	if cea.ProductName != "totogi-ccab" {
+		t.Fatalf("Unexpected Product-Name. Want totogi-ccab, have %s", cea.ProductName)
+	}
+	// AI-GEN END - Github Copilot (copy-paste)
 }
 
 // TestCommonAppIdCEA tests that at least one CEA AppID exist in the default dictionary
@@ -286,4 +342,22 @@ func TestCEAAutAndAcct(t *testing.T) {
 			t.Fatalf("Unexpected app ID. Want 4, have %d", app[0])
 		}
 	}
+	// AI-GEN START - Github Copilot (copy-paste)
+	if len(cea.AuthApplicationID) != 1 {
+		t.Fatalf("Unexpected length of Auth-Application-ID. Want 1, have %d", len(cea.AuthApplicationID))
+	}
+	authApplicationId, ok := cea.AuthApplicationID[0].Data.(datatype.Unsigned32)
+	if authApplicationId != 4 || !ok {
+		t.Fatalf("Unexpected value for Auth-Application-ID. Want 4, have %d", *cea.AuthApplicationID[0])
+	}
+	if len(cea.VendorSpecificApplicationID) != 0 {
+		t.Fatalf("Unexpected length of Vendor-Specific-Application-ID. Want 0, have %d", len(cea.VendorSpecificApplicationID))
+	}
+	if cea.VendorID != 0 {
+		t.Fatalf("Unexpected Vendor-ID. Want 0, have %d", cea.VendorID)
+	}
+	if cea.ProductName != "totogi-ccab" {
+		t.Fatalf("Unexpected Product-Name. Want totogi-ccab, have %s", cea.ProductName)
+	}
+	// AI-GEN END - Github Copilot (copy-paste)
 }
