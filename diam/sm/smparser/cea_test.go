@@ -167,7 +167,7 @@ func TestCEA(t *testing.T) {
 	}
 	authApplicationId, _ := cea.AuthApplicationID[0].Data.(datatype.Unsigned32)
 	if authApplicationId != 4 {
-		t.Fatalf("Unexpected value for Auth-Application-ID. Want 4, have %d", *cea.AuthApplicationID[0])
+		t.Fatalf("Unexpected value for Auth-Application-ID. Want 4, have %d", authApplicationId)
 	}
 	if len(cea.VendorSpecificApplicationID) != 0 {
 		t.Fatalf("Unexpected length of Vendor-Specific-Application-ID. Want 0, have %d", len(cea.VendorSpecificApplicationID))
@@ -280,7 +280,7 @@ func TestCommonAppIdCEA(t *testing.T) {
 	}
 	authApplicationId, _ := cea.AuthApplicationID[0].Data.(datatype.Unsigned32)
 	if authApplicationId != 4 {
-		t.Fatalf("Unexpected value for Auth-Application-ID. Want 4, have %d", *cea.AuthApplicationID[0])
+		t.Fatalf("Unexpected value for Auth-Application-ID. Want 4, have %d", authApplicationId)
 	}
 	if len(cea.VendorSpecificApplicationID) != 2 {
 		t.Fatalf("Unexpected length of Vendor-Specific-Application-ID. Want 2, have %d", len(cea.VendorSpecificApplicationID))
@@ -348,7 +348,7 @@ func TestCEAAutAndAcct(t *testing.T) {
 	}
 	authApplicationId, ok := cea.AuthApplicationID[0].Data.(datatype.Unsigned32)
 	if authApplicationId != 4 || !ok {
-		t.Fatalf("Unexpected value for Auth-Application-ID. Want 4, have %d", *cea.AuthApplicationID[0])
+		t.Fatalf("Unexpected value for Auth-Application-ID. Want 4, have %d", authApplicationId)
 	}
 	if len(cea.VendorSpecificApplicationID) != 0 {
 		t.Fatalf("Unexpected length of Vendor-Specific-Application-ID. Want 0, have %d", len(cea.VendorSpecificApplicationID))
