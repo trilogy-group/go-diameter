@@ -77,6 +77,7 @@ type Settings struct {
 	HostIPAddress       datatype.Address
 	RequestHandlerProxy MessageHandlerProxy
 	AnswerHandlerProxy  MessageHandlerProxy
+	SupportedApps       []*SupportedApp
 }
 
 var (
@@ -97,8 +98,9 @@ type StateMachine struct {
 	supportedApps []*SupportedApp
 }
 
+// AI-GEN START - Cursor with GPT
 // New creates and initializes a new StateMachine for clients or servers.
-func New(settings *Settings) *StateMachine {
+func New(settings *Settings) (*StateMachine, error) { // AI-GEN START - Cursor with GPT
 	if len(settings.HostIPAddresses) == 0 && len(settings.HostIPAddress) > 0 {
 		settings.HostIPAddresses = []datatype.Address{settings.HostIPAddress}
 	}
@@ -109,11 +111,47 @@ func New(settings *Settings) *StateMachine {
 		settings.AnswerHandlerProxy = defaultHandlerFuncProxy
 	}
 
+	// Prepare the list of supported apps from the dictionary
+	preparedApps := PrepareSupportedApps(dict.Default)
+
+	var supportedApps []*SupportedApp
+	if settings.SupportedApps != nil {
+		// Filter the prepared apps based on the settings
+		for _, app := range preparedApps {
+			if app.ID == 0 {
+				supportedApps = append(supportedApps, app)
+				continue
+			}
+			for _, suppApp := range settings.SupportedApps {
+				if suppApp.ID == app.ID && suppApp.AppType == app.AppType && suppApp.Vendor == app.Vendor {
+					supportedApps = append(supportedApps, app)
+					break
+				}
+			}
+		}
+
+		// Check if there are any unsupported apps in settings
+		for _, suppApp := range settings.SupportedApps {
+			found := false
+			for _, app := range supportedApps {
+				if suppApp.ID == app.ID && suppApp.AppType == app.AppType && suppApp.Vendor == app.Vendor {
+					found = true
+					break
+				}
+			}
+			if !found {
+				return nil, fmt.Errorf("unsupported app found in settings: %v", suppApp)
+			}
+		}
+	} else {
+		supportedApps = preparedApps
+	}
+
 	sm := &StateMachine{
 		cfg:           settings,
 		mux:           diam.NewServeMux(),
 		hsNotifyc:     make(chan diam.Conn),
-		supportedApps: PrepareSupportedApps(dict.Default),
+		supportedApps: supportedApps,
 	}
 
 	var cerHandlerProxy diam.HandlerFunc = func(c diam.Conn, m *diam.Message) {
@@ -132,8 +170,11 @@ func New(settings *Settings) *StateMachine {
 	sm.mux.Handle("DWR", handshakeOK(dwrHandlerProxy))
 	sm.mux.HandleIdx(baseCERIdx, cerHandlerProxy)
 	sm.mux.HandleIdx(baseDWRIdx, dwrHandlerProxy)
-	return sm
+
+	return sm, nil
 }
+
+// AI-GEN END - Cursor with GPT
 
 // Settings return the Settings object used by this StateMachine.
 func (sm *StateMachine) Settings() *Settings {

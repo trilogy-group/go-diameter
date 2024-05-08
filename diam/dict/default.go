@@ -20,12 +20,12 @@ func init() {
 		{"Base", baseXML},
 		{"Credit Control", creditcontrolXML},
 		{"Sy Interface", diametersyXML},
-		// {"Gx Charging Control", gxcreditcontrolXML},
-		// {"Network Access Server", networkaccessserverXML},
+		{"Gx Charging Control", gxcreditcontrolXML},
+		{"Network Access Server", networkaccessserverXML},
 		{"TGPP", tgpprorfXML},
-		// {"TGPP_Rx", tgpprxXML},
-		// {"TGPP_S6a", tgpps6aXML},
-		// {"TGPP_Swx", tgppswxXML},
+		{"TGPP_Rx", tgpprxXML},
+		{"TGPP_S6a", tgpps6aXML},
+		{"TGPP_Swx", tgppswxXML},
 	}
 	var err error
 	Default, err = NewParser()
