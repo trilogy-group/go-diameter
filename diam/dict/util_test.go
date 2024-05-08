@@ -11,23 +11,44 @@ import (
 
 func TestApps(t *testing.T) {
 	apps := Default.Apps()
-	if len(apps) != 4 {
-		t.Fatalf("Unexpected # of apps. Want 4, have %d", len(apps))
+	if len(apps) != 10 {
+		t.Fatalf("Unexpected # of apps. Want 10, have %d", len(apps))
 	}
 	// Base protocol.
 	if apps[0].ID != 0 {
 		t.Fatalf("Unexpected app.ID. Want 0, have %d", apps[0].ID)
 	}
-	if apps[1].ID != 4 {
+	// Base accounting
+	if apps[1].ID != 3 {
+		t.Fatalf("Unexpected app.ID. Want 3, have %d", apps[1].ID)
+	}
+	// Credit-Control applications.
+	if apps[2].ID != 4 {
 		t.Fatalf("Unexpected app.ID. Want 4, have %d", apps[2].ID)
 	}
-	if apps[2].ID != 16777302 {
-		t.Fatalf("Unexpected app.ID. Want 16777302, have %d", apps[3].ID)
+	// 3GPP Gx Charging Control applications
+	if apps[3].ID != 16777238 {
+		t.Fatalf("Unexpected app.ID. Want 16777238, have %d", apps[3].ID)
 	}
-	if apps[3].ID != 4 {
-		t.Fatalf("Unexpected app.ID. Want 4, have %d", apps[4].ID)
+	// NASREQ applications
+	if apps[4].ID != 1 {
+		t.Fatalf("Unexpected app.ID. Want 1, have %d", apps[4].ID)
+	}
+	// 3GPP S6a applications
+	if apps[6].ID != 16777236 {
+		t.Fatalf("Unexpected app.ID. Want 16777236, have %d", apps[6].ID)
+	}
+	if apps[7].ID != 16777251 {
+		t.Fatalf("Unexpected app.ID. Want 16777251, have %d", apps[7].ID)
+	}
+	if apps[8].ID != 16777265 {
+		t.Fatalf("Unexpected app.ID. Want 16777265, have %d", apps[8].ID)
 	}
 
+	// Diameter Sy
+	if apps[9].ID != 16777302 {
+		t.Fatalf("Unexpected app.ID. Want 16777302, have %d", apps[9].ID)
+	}
 }
 
 func TestApp(t *testing.T) {
@@ -51,7 +72,7 @@ func findAVPCodeTest(t *testing.T, app uint32, codeStr string, vendor, expectedC
 	}
 }
 
-func DisabledTestFindAVPWithVendor(t *testing.T) {
+func TestFindAVPWithVendor(t *testing.T) {
 	var nokiaXML = `<?xml version="1.0" encoding="UTF-8"?>
 <diameter>
   <application id="43">
@@ -106,17 +127,17 @@ func TestFindCommand(t *testing.T) {
 		t.Fatalf("Unexpected command: %#v", cmd)
 	}
 
-	if cmd, err := Default.FindCommand(16777302, 8388635); err != nil {
+	if cmd, err := Default.FindCommand(16777251, 316); err != nil {
 		t.Error(err)
-	} else if cmd.Short != "SL" {
+	} else if cmd.Short != "UL" {
 		t.Fatalf("Unexpected command: %#v", cmd)
 	}
 
-	// if cmd, err := Default.FindCommand(16777251, 318); err != nil {
-	// 	t.Error(err)
-	// } else if cmd.Short != "AI" {
-	// 	t.Fatalf("Unexpected command: %#v", cmd)
-	// }
+	if cmd, err := Default.FindCommand(16777251, 318); err != nil {
+		t.Error(err)
+	} else if cmd.Short != "AI" {
+		t.Fatalf("Unexpected command: %#v", cmd)
+	}
 }
 
 func TestEnum(t *testing.T) {

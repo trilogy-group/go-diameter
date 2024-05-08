@@ -61,7 +61,10 @@ func testS6aClientServer(network string, t *testing.T) {
 	results := make(chan error, CONCURENT_CLIENTS*2)
 
 	// Create the state machine (mux) and set its message handlers.
-	mux := New(settings)
+	mux, err := New(settings)
+	if err != nil {
+		t.Error(err)
+	}
 
 	mux.HandleIdx(
 		diam.CommandIndex{AppID: diam.TGPP_S6A_APP_ID, Code: diam.AuthenticationInformation, Request: true},
@@ -89,7 +92,7 @@ func testS6aClientServer(network string, t *testing.T) {
 			results <- err
 		}
 	}()
-	err := <-results
+	err = <-results
 	time.Sleep(time.Millisecond * 10)
 
 	// Initialize Client
@@ -104,7 +107,10 @@ func testS6aClientServer(network string, t *testing.T) {
 	}
 
 	// Create the state machine (it's a diam.ServeMux) and client.
-	cmux := New(cfg)
+	cmux, err := New(cfg)
+	if err != nil {
+		t.Error(err)
+	}
 
 	cli := &Client{
 		Dict:               dict.Default,

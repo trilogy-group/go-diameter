@@ -19,13 +19,13 @@ func init() {
 	var dictionaries = []struct{ name, xml string }{
 		{"Base", baseXML},
 		{"Credit Control", creditcontrolXML},
-		{"Sy Interface", diametersyXML},
 		{"Gx Charging Control", gxcreditcontrolXML},
 		{"Network Access Server", networkaccessserverXML},
 		{"TGPP", tgpprorfXML},
 		{"TGPP_Rx", tgpprxXML},
 		{"TGPP_S6a", tgpps6aXML},
 		{"TGPP_Swx", tgppswxXML},
+		{"Sy Interface", diametersyXML},
 	}
 	var err error
 	Default, err = NewParser()
@@ -563,7 +563,8 @@ var baseXML = `<?xml version="1.0" encoding="UTF-8"?>
 				<item code="15" name="PRIORITY_15"/>
 			</data>
 		</avp>
-
+		</application>
+		<application id="3" type="acct" name="Base Accounting"> <!-- Diameter Base Accounting Messages -->
 
 	</application>
 </diameter>`

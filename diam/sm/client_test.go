@@ -31,8 +31,14 @@ func TestClient_Dial_MissingStateMachine(t *testing.T) {
 }
 
 func TestClient_Dial_InvalidAddress(t *testing.T) {
+
+	handler, err := New(clientSettings)
+	if err != nil {
+		t.Error(err)
+	}
+
 	cli := &Client{
-		Handler: New(clientSettings),
+		Handler: handler,
 		AcctApplicationID: []*diam.AVP{
 			diam.NewAVP(avp.AcctApplicationID, avp.Mbit, 0,
 				datatype.Unsigned32(0)),
@@ -46,8 +52,12 @@ func TestClient_Dial_InvalidAddress(t *testing.T) {
 }
 
 func TestClient_DialTLS_InvalidAddress(t *testing.T) {
+	handler, err := New(clientSettings)
+	if err != nil {
+		t.Error(err)
+	}
 	cli := &Client{
-		Handler: New(clientSettings),
+		Handler: handler,
 		AcctApplicationID: []*diam.AVP{
 			diam.NewAVP(avp.AcctApplicationID, avp.Mbit, 0, datatype.Unsigned32(0)),
 		},
@@ -60,10 +70,12 @@ func TestClient_DialTLS_InvalidAddress(t *testing.T) {
 }
 
 func TestClient_Handshake(t *testing.T) {
-	srv := diamtest.NewServer(New(serverSettings), dict.Default)
+	s1, _ := New(serverSettings)
+	s2, _ := New(clientSettings)
+	srv := diamtest.NewServer(s1, dict.Default)
 	defer srv.Close()
 	cli := &Client{
-		Handler: New(clientSettings),
+		Handler: s2,
 		SupportedVendorID: []*diam.AVP{
 			diam.NewAVP(avp.SupportedVendorID, avp.Mbit, 0, clientSettings.VendorID),
 		},
@@ -93,11 +105,13 @@ func TestClient_Handshake_CustomIP_TCP(t *testing.T) {
 }
 
 func testClient_Handshake_CustomIP(t *testing.T, network string) {
-	srv := diamtest.NewServerNetwork(network, New(serverSettings), dict.Default)
+	s1, _ := New(serverSettings)
+	s2, _ := New(clientSettings2)
+	srv := diamtest.NewServerNetwork(network, s1, dict.Default)
 	defer srv.Close()
 	cli := &Client{
 		RetransmitInterval: time.Second * 3,
-		Handler:            New(clientSettings2),
+		Handler:            s2,
 		SupportedVendorID: []*diam.AVP{
 			diam.NewAVP(avp.SupportedVendorID, avp.Mbit, 0, clientSettings.VendorID),
 		},
@@ -123,10 +137,12 @@ func testClient_Handshake_CustomIP(t *testing.T, network string) {
 }
 
 func TestClient_Handshake_Notify(t *testing.T) {
-	srv := diamtest.NewServer(New(serverSettings), dict.Default)
+	s1, _ := New(serverSettings)
+	s2, _ := New(clientSettings)
+	srv := diamtest.NewServer(s1, dict.Default)
 	defer srv.Close()
 	cli := &Client{
-		Handler: New(clientSettings),
+		Handler: s2,
 		SupportedVendorID: []*diam.AVP{
 			diam.NewAVP(avp.SupportedVendorID, avp.Mbit, 0, clientSettings.VendorID),
 		},
@@ -170,8 +186,9 @@ func TestClient_Handshake_FailParseCEA(t *testing.T) {
 	})
 	srv := diamtest.NewServer(mux, dict.Default)
 	defer srv.Close()
+	s1, _ := New(clientSettings)
 	cli := &Client{
-		Handler: New(clientSettings),
+		Handler: s1,
 		AcctApplicationID: []*diam.AVP{
 			diam.NewAVP(avp.AcctApplicationID, avp.Mbit, 0, datatype.Unsigned32(3)),
 		},
@@ -200,8 +217,9 @@ func TestClient_Handshake_FailedResultCode(t *testing.T) {
 	})
 	srv := diamtest.NewServer(mux, dict.Default)
 	defer srv.Close()
+	s1, _ := New(clientSettings)
 	cli := &Client{
-		Handler: New(clientSettings),
+		Handler: s1,
 		AcctApplicationID: []*diam.AVP{
 			diam.NewAVP(avp.AcctApplicationID, avp.Mbit, 0, datatype.Unsigned32(3)),
 		},
@@ -228,8 +246,9 @@ func TestClient_Handshake_RetransmitTimeout(t *testing.T) {
 	})
 	srv := diamtest.NewServer(mux, dict.Default)
 	defer srv.Close()
+	s1, _ := New(clientSettings)
 	cli := &Client{
-		Handler:            New(clientSettings),
+		Handler:            s1,
 		MaxRetransmits:     3,
 		RetransmitInterval: time.Millisecond,
 		AcctApplicationID: []*diam.AVP{
@@ -249,12 +268,14 @@ func TestClient_Handshake_RetransmitTimeout(t *testing.T) {
 }
 
 func TestClient_Watchdog(t *testing.T) {
-	srv := diamtest.NewServer(New(serverSettings), dict.Default)
+	s1, _ := New(clientSettings)
+	srv := diamtest.NewServer(s1, dict.Default)
 	defer srv.Close()
+	s2, _ := New(clientSettings)
 	cli := &Client{
 		EnableWatchdog:   true,
 		WatchdogInterval: 100 * time.Millisecond,
-		Handler:          New(clientSettings),
+		Handler:          s2,
 		AcctApplicationID: []*diam.AVP{
 			diam.NewAVP(avp.AcctApplicationID, avp.Mbit, 0, datatype.Unsigned32(3)),
 		},
@@ -277,19 +298,29 @@ func TestClient_Watchdog(t *testing.T) {
 }
 
 func TestClient_Watchdog_Timeout(t *testing.T) {
-	sm := New(serverSettings)
+	sm, err := New(serverSettings)
+
+	if err != nil {
+		t.Error(err)
+	}
+
 	var once sync.Once
 	sm.mux.HandleIdx(baseDWRIdx, handshakeOK(func(c diam.Conn, m *diam.Message) {
 		once.Do(func() { m.Answer(diam.UnableToComply).WriteTo(c) })
 	}))
 	srv := diamtest.NewServer(sm, dict.Default)
 	defer srv.Close()
+	handler, err := New(clientSettings)
+	if err != nil {
+		t.Error(err)
+	}
+
 	cli := &Client{
 		MaxRetransmits:     3,
 		RetransmitInterval: 50 * time.Millisecond,
 		EnableWatchdog:     true,
 		WatchdogInterval:   50 * time.Millisecond,
-		Handler:            New(clientSettings),
+		Handler:            handler,
 		AcctApplicationID: []*diam.AVP{
 			diam.NewAVP(avp.AcctApplicationID, avp.Mbit, 0, datatype.Unsigned32(3)),
 		},

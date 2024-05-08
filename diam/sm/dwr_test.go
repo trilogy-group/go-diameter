@@ -19,7 +19,10 @@ import (
 // These tests use dictionary, settings and functions from sm_test.go.
 
 func TestHandleDWR(t *testing.T) {
-	sm := New(serverSettings)
+	sm, err := New(serverSettings)
+	if err != nil {
+		t.Error(err)
+	}
 	srv := diamtest.NewServer(sm, dict.Default)
 	defer srv.Close()
 	mc := make(chan *diam.Message, 1)
@@ -109,7 +112,10 @@ func TestHandleDWRWithMessageHandlers(t *testing.T) {
 			return f(c, m)
 		}
 	}
-	sm := New(&modServerSettings)
+	sm, err := New(&modServerSettings)
+	if err != nil {
+		t.Error(err)
+	}
 	srv := diamtest.NewServer(sm, dict.Default)
 	defer srv.Close()
 	mc := make(chan *diam.Message, 1)
@@ -184,7 +190,10 @@ func TestHandleDWRWithMessageHandlers(t *testing.T) {
 }
 
 func TestHandleDWR_Fail(t *testing.T) {
-	sm := New(serverSettings)
+	sm, err := New(serverSettings)
+	if err != nil {
+		t.Error(err)
+	}
 	srv := diamtest.NewServer(sm, dict.Default)
 	defer srv.Close()
 	mc := make(chan *diam.Message, 1)
