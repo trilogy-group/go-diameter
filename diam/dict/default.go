@@ -19,12 +19,13 @@ func init() {
 	var dictionaries = []struct{ name, xml string }{
 		{"Base", baseXML},
 		{"Credit Control", creditcontrolXML},
-		{"Gx Charging Control", gxcreditcontrolXML},
-		{"Network Access Server", networkaccessserverXML},
+		{"Sy Interface", diametersyXML},
+		// {"Gx Charging Control", gxcreditcontrolXML},
+		// {"Network Access Server", networkaccessserverXML},
 		{"TGPP", tgpprorfXML},
-		{"TGPP_Rx", tgpprxXML},
-		{"TGPP_S6a", tgpps6aXML},
-		{"TGPP_Swx", tgppswxXML},
+		// {"TGPP_Rx", tgpprxXML},
+		// {"TGPP_S6a", tgpps6aXML},
+		// {"TGPP_Swx", tgppswxXML},
 	}
 	var err error
 	Default, err = NewParser()
@@ -565,8 +566,6 @@ var baseXML = `<?xml version="1.0" encoding="UTF-8"?>
 
 
 	</application>
-	<application id="3" type="acct" name="Base Accounting"> <!-- Diameter Base Accounting Messages -->
-	</application>
 </diameter>`
 
 var creditcontrolXML = `<?xml version="1.0" encoding="UTF-8"?>
@@ -832,6 +831,7 @@ var creditcontrolXML = `<?xml version="1.0" encoding="UTF-8"?>
 				<rule avp="Validity-Time" required="false" max="1"/>
 				<rule avp="Result-Code" required="false" max="1"/>
 				<rule avp="Final-Unit-Indication" required="false" max="1"/>
+				<rule avp="Reporting-Reason" required="false" max="1"/>
 				<!-- *[ AVP ]-->
 			</data>
 		</avp>
@@ -1029,6 +1029,7 @@ var diametersyXML = `<?xml version="1.0" encoding="UTF-8"?>
 		<!-- Diameter Credit Control Application -->
 		<!-- http://tools.ietf.org/html/rfc4006 -->
 
+        <vendor id="10415" name="TGPP"/>
 		<command code="8388635" short="SL" name="Spending-Limit">
 			<request>
 				<!-- http://tools.ietf.org/html/rfc4006#section-3.1 -->

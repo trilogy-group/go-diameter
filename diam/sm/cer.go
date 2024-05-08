@@ -144,6 +144,8 @@ func successCEA(sm *StateMachine, c diam.Conn, m *diam.Message, cer *smparser.CE
 	if cer.OriginStateID != nil {
 		a.AddAVP(cer.OriginStateID)
 	}
+	addedSupportedVendors := make(map[uint32]bool)
+
 	for _, app := range sm.supportedApps {
 		var typ uint32
 		switch app.AppType {
@@ -153,7 +155,10 @@ func successCEA(sm *StateMachine, c diam.Conn, m *diam.Message, cer *smparser.CE
 			typ = avp.AcctApplicationID
 		}
 		if app.Vendor != 0 {
-			a.NewAVP(avp.SupportedVendorID, avp.Mbit, 0, datatype.Unsigned32(app.Vendor))
+			if !addedSupportedVendors[app.Vendor] {
+				a.NewAVP(avp.SupportedVendorID, avp.Mbit, 0, datatype.Unsigned32(app.Vendor))
+				addedSupportedVendors[app.Vendor] = true
+			}
 			a.NewAVP(avp.VendorSpecificApplicationID, avp.Mbit, 0, &diam.GroupedAVP{
 				AVP: []*diam.AVP{
 					diam.NewAVP(avp.VendorID, avp.Mbit, 0, datatype.Unsigned32(app.Vendor)),
