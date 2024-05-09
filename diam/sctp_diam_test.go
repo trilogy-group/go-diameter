@@ -50,11 +50,6 @@ func TestCapabilitiesExchangeSCTP(t *testing.T) {
 func TestCapabilitiesExchangeSCTP_TLS(t *testing.T) {
 	errc := make(chan error, 1)
 
-	cert, err := tls.LoadX509KeyPair("testdata/example-cert.pem", "testdata/example-key.pem")
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	smux := diam.NewServeMux()
 	smux.Handle("CER", handleCER(errc, true))
 
@@ -63,8 +58,8 @@ func TestCapabilitiesExchangeSCTP_TLS(t *testing.T) {
 	srv.Config.ReadTimeout = tm
 	srv.Config.WriteTimeout = tm
 	srv.TLS = &tls.Config{
-		Certificates: []tls.Certificate{cert},
-		MinVersion:   tls.VersionTLS13,
+		MinVersion: tls.VersionTLS10,
+		MaxVersion: tls.VersionTLS10,
 	}
 	srv.StartTLS()
 	time.Sleep(time.Millisecond * 10) // let srv start
@@ -74,7 +69,7 @@ func TestCapabilitiesExchangeSCTP_TLS(t *testing.T) {
 	cmux := diam.NewServeMux()
 	cmux.Handle("CEA", handleCEA(errc, wait))
 
-	cli, err := diam.DialNetworkTLS("sctp", srv.Addr, "testdata/example-cert.pem", "testdata/example-key.pem", cmux, nil)
+	cli, err := diam.DialNetworkTLS("sctp", srv.Addr, "", "", cmux, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
