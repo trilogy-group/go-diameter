@@ -18,9 +18,6 @@ type CEA struct {
 	OriginHost                  datatype.DiameterIdentity `avp:"Origin-Host"`
 	OriginRealm                 datatype.DiameterIdentity `avp:"Origin-Realm"`
 	OriginStateID               uint32                    `avp:"Origin-State-Id"`
-	VendorID                    uint32                    `avp:"Vendor-Id"`
-	ProductName                 string                    `avp:"Product-Name"`
-	SupportedVendorID           []*diam.AVP               `avp:"Supported-Vendor-Id"`
 	AcctApplicationID           []*diam.AVP               `avp:"Acct-Application-Id"`
 	AuthApplicationID           []*diam.AVP               `avp:"Auth-Application-Id"`
 	VendorSpecificApplicationID []*diam.AVP               `avp:"Vendor-Specific-Application-Id"`
