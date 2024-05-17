@@ -5,6 +5,8 @@
 package sm
 
 import (
+	"fmt"
+	"strings"
 	"testing"
 	"time"
 
@@ -99,6 +101,61 @@ func testStateMachine(t *testing.T, network string) {
 		if !testResultCode(resp, diam.Success) {
 			t.Fatalf("Unexpected result code.\n%s", resp)
 		}
+
+		expectedCea := strings.TrimSpace(fmt.Sprintf(`
+Capabilities-Exchange-Answer (CEA)
+{Code:257,Flags:0x0,Version:0x1,Length:452,ApplicationId:1001,HopByHopId:0x%x,EndToEndId:0x%x}
+	Result-Code {Code:268,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{2001}}
+	Origin-Host {Code:264,Flags:0x40,Length:12,VendorId:0,Value:DiameterIdentity{srv},Padding:1}
+	Origin-Realm {Code:296,Flags:0x40,Length:12,VendorId:0,Value:DiameterIdentity{test},Padding:0}
+	Host-IP-Address {Code:257,Flags:0x40,Length:16,VendorId:0,Value:Address{127.0.0.1},Padding:2}
+	Vendor-Id {Code:266,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{13}}
+	Product-Name {Code:269,Flags:0x0,Length:20,VendorId:0,Value:UTF8String{go-diameter},Padding:1}
+	Origin-State-Id {Code:278,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{1}}
+	Acct-Application-Id {Code:259,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{3}}
+	Auth-Application-Id {Code:258,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{4}}
+	Supported-Vendor-Id {Code:265,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{10415}}
+	Vendor-Specific-Application-Id {Code:260,Flags:0x40,Length:32,VendorId:0,Value:Grouped{
+		Vendor-Id {Code:266,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{10415}},
+		Auth-Application-Id {Code:258,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{16777238}},
+	}}
+	Auth-Application-Id {Code:258,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{1}}
+	Supported-Vendor-Id {Code:265,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{10415}}
+	Vendor-Specific-Application-Id {Code:260,Flags:0x40,Length:32,VendorId:0,Value:Grouped{
+		Vendor-Id {Code:266,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{10415}},
+		Auth-Application-Id {Code:258,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{4}},
+	}}
+	Supported-Vendor-Id {Code:265,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{10415}}
+	Vendor-Specific-Application-Id {Code:260,Flags:0x40,Length:32,VendorId:0,Value:Grouped{
+		Vendor-Id {Code:266,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{10415}},
+		Auth-Application-Id {Code:258,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{16777236}},
+	}}
+	Supported-Vendor-Id {Code:265,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{10415}}
+	Vendor-Specific-Application-Id {Code:260,Flags:0x40,Length:32,VendorId:0,Value:Grouped{
+		Vendor-Id {Code:266,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{10415}},
+		Auth-Application-Id {Code:258,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{16777251}},
+	}}
+	Supported-Vendor-Id {Code:265,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{10415}}
+	Vendor-Specific-Application-Id {Code:260,Flags:0x40,Length:32,VendorId:0,Value:Grouped{
+		Vendor-Id {Code:266,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{10415}},
+		Auth-Application-Id {Code:258,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{16777265}},
+	}}
+	Supported-Vendor-Id {Code:265,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{10415}}
+	Vendor-Specific-Application-Id {Code:260,Flags:0x40,Length:32,VendorId:0,Value:Grouped{
+		Vendor-Id {Code:266,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{10415}},
+		Auth-Application-Id {Code:258,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{16777302}},
+	}}
+	Acct-Application-Id {Code:259,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{1001}}
+	Auth-Application-Id {Code:258,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{1002}}
+	Firmware-Revision {Code:267,Flags:0x0,Length:12,VendorId:0,Value:Unsigned32{1}}
+
+			`, resp.Header.HopByHopID, resp.Header.EndToEndID))
+		actualCea := strings.TrimSpace(resp.String())
+
+		if expectedCea != actualCea {
+			t.Errorf("CEA is not as expected. Actual CEA: \n %s \n Expected CEA %s", actualCea, expectedCea)
+		}
+
 	case err := <-sm.ErrorReports():
 		t.Fatal(err)
 	case err := <-mux.ErrorReports():
