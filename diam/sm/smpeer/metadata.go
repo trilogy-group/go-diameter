@@ -7,8 +7,8 @@ package smpeer
 import (
 	"golang.org/x/net/context"
 
-	"github.com/trilogy-group/go-diameter/v4/diam/datatype"
-	"github.com/trilogy-group/go-diameter/v4/diam/sm/smparser"
+	"github.com/fiorix/go-diameter/v4/diam/datatype"
+	"github.com/fiorix/go-diameter/v4/diam/sm/smparser"
 )
 
 type key int

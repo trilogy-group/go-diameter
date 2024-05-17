@@ -7,7 +7,7 @@ package smparser
 import (
 	"bytes"
 
-	"github.com/trilogy-group/go-diameter/v4/diam/dict"
+	"github.com/fiorix/go-diameter/v4/diam/dict"
 )
 
 func init() {

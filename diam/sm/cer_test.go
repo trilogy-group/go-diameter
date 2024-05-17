@@ -8,12 +8,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/trilogy-group/go-diameter/v4/diam"
-	"github.com/trilogy-group/go-diameter/v4/diam/avp"
-	"github.com/trilogy-group/go-diameter/v4/diam/datatype"
-	"github.com/trilogy-group/go-diameter/v4/diam/diamtest"
-	"github.com/trilogy-group/go-diameter/v4/diam/dict"
-	"github.com/trilogy-group/go-diameter/v4/diam/sm/smpeer"
+	"github.com/fiorix/go-diameter/v4/diam"
+	"github.com/fiorix/go-diameter/v4/diam/avp"
+	"github.com/fiorix/go-diameter/v4/diam/datatype"
+	"github.com/fiorix/go-diameter/v4/diam/diamtest"
+	"github.com/fiorix/go-diameter/v4/diam/dict"
+	"github.com/fiorix/go-diameter/v4/diam/sm/smpeer"
 )
 
 // These tests use dictionary, settings and functions from sm_test.go.
@@ -190,7 +190,7 @@ func TestHandleCER_HandshakeMetadata_CustomIP(t *testing.T) {
 	}
 }
 
-func TestHandleCERAndCea_Acct(t *testing.T) {
+func TestHandleCER_Acct(t *testing.T) {
 	sm := New(serverSettings)
 	srv := diamtest.NewServer(sm, dict.Default)
 	defer srv.Close()
@@ -217,20 +217,16 @@ func TestHandleCERAndCea_Acct(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	var resp *diam.Message
 	select {
-	case resp = <-mc:
+	case resp := <-mc:
 		if !testResultCode(resp, diam.Success) {
 			t.Fatalf("Unexpected result code.\n%s", resp)
 		}
-
 	case err := <-mux.ErrorReports():
 		t.Fatal(err)
 	case <-time.After(time.Second):
 		t.Fatal("No message received")
 	}
-
 }
 
 func TestHandleCER_Acct_Fail(t *testing.T) {
