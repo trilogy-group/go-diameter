@@ -12,10 +12,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/fiorix/go-diameter/v4/diam"
-	"github.com/fiorix/go-diameter/v4/diam/avp"
-	"github.com/fiorix/go-diameter/v4/diam/datatype"
-	"github.com/fiorix/go-diameter/v4/diam/diamtest"
+	"github.com/trilogy-group/go-diameter/v4/diam"
+	"github.com/trilogy-group/go-diameter/v4/diam/avp"
+	"github.com/trilogy-group/go-diameter/v4/diam/datatype"
+	"github.com/trilogy-group/go-diameter/v4/diam/diamtest"
 )
 
 func TestCapabilitiesExchange(t *testing.T) {
@@ -60,8 +60,8 @@ func TestCapabilitiesExchangeTLS(t *testing.T) {
 	srv.Config.ReadTimeout = tm
 	srv.Config.WriteTimeout = tm
 	srv.TLS = &tls.Config{
-		MinVersion: tls.VersionTLS10,
-		MaxVersion: tls.VersionTLS10,
+		MinVersion: tls.VersionTLS12,
+		MaxVersion: tls.VersionTLS12,
 	}
 	srv.StartTLS()
 	time.Sleep(time.Millisecond * 10) // let srv start
