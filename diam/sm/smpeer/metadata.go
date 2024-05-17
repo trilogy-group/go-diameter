@@ -21,6 +21,8 @@ type Metadata struct {
 	OriginHost   datatype.DiameterIdentity
 	OriginRealm  datatype.DiameterIdentity
 	Applications []uint32 // Acct or Auth IDs supported by the peer.
+	Cer          *smparser.CER
+	Cea          *smparser.CEA
 }
 
 // FromCER creates a Metadata object from data in the CER.
@@ -29,6 +31,7 @@ func FromCER(cer *smparser.CER) *Metadata {
 		OriginHost:   cer.OriginHost,
 		OriginRealm:  cer.OriginRealm,
 		Applications: cer.Applications(),
+		Cer:          cer,
 	}
 }
 
@@ -38,6 +41,7 @@ func FromCEA(cea *smparser.CEA) *Metadata {
 		OriginHost:   cea.OriginHost,
 		OriginRealm:  cea.OriginRealm,
 		Applications: cea.Applications(),
+		Cea:          cea,
 	}
 }
 
