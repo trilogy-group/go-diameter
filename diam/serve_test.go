@@ -60,8 +60,8 @@ func TestCapabilitiesExchangeTLS(t *testing.T) {
 	srv.Config.ReadTimeout = tm
 	srv.Config.WriteTimeout = tm
 	srv.TLS = &tls.Config{
-		MinVersion: tls.VersionTLS10,
-		MaxVersion: tls.VersionTLS10,
+		MinVersion: tls.VersionTLS12,
+		MaxVersion: tls.VersionTLS12,
 	}
 	srv.StartTLS()
 	time.Sleep(time.Millisecond * 10) // let srv start

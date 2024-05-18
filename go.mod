@@ -10,3 +10,5 @@ require (
 	golang.org/x/net v0.0.0-20191007182048-72f939374954
 	google.golang.org/grpc v1.24.0
 )
+
+replace github.com/fiorix/go-diameter/v4 => ./
