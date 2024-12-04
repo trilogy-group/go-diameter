@@ -639,6 +639,16 @@ var creditcontrolXML = `<?xml version="1.0" encoding="UTF-8"?>
 			</answer>
 		</command>
 
+		<avp name="Announcement-Information" code="3904" must="M" may="P" must-not="V" may-encrypt="Y">
+			<data type="Grouped">
+				<rule avp="Announcement-Identifier" required="true" max="1"/>
+			</data>
+		</avp>
+		
+		<avp name="Announcement-Identifier" code="3905" must="M" may="P" must-not="V" may-encrypt="Y">
+			<data type="Unsigned32"/>
+		</avp>
+
 		<avp name="CC-Correlation-Id" code="411" must="-" may="P,M" must-not="V" may-encrypt="Y">
 			<!-- http://tools.ietf.org/html/rfc4006#section-8.1 -->
 			<data type="OctetString"/>
