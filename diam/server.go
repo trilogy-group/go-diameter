@@ -162,12 +162,21 @@ func (c *conn) readMessage() (m *Message, err error) {
 	if c.server.ReadTimeout > 0 {
 		c.rwc.SetReadDeadline(time.Now().Add(c.server.ReadTimeout))
 	}
+
+	wrappedMethod := func(m *Message) error {
+		if c.server.ReadMessageHook == nil {
+			return nil
+		}
+
+		return c.server.ReadMessageHook(c.writer, m)
+	}
+
 	if msc, isMulti := c.rwc.(MultistreamConn); isMulti {
 		// If it's a multi-stream association - reset the stream to "undefined" prior to reading next message
 		msc.ResetCurrentStream()
-		m, err = ReadMessage(msc, c.dictionary()) // MultistreamConn has it's own buffering
+		m, err = ReadMessage(msc, c.dictionary(), wrappedMethod) // MultistreamConn has it's own buffering
 	} else {
-		m, err = ReadMessage(c.buf.Reader, c.dictionary())
+		m, err = ReadMessage(c.buf.Reader, c.dictionary(), wrappedMethod)
 	}
 	if err != nil {
 		return nil, err
@@ -557,16 +566,19 @@ func Serve(l net.Listener, handler Handler) error {
 	return srv.Serve(l)
 }
 
+type ReadMessageHook = func(Conn, *Message) error
+
 // A Server defines parameters for running a diameter server.
 type Server struct {
-	Network      string        // network of the address - empty string defaults to tcp
-	Addr         string        // address to listen on, ":3868" if empty
-	Handler      Handler       // handler to invoke, DefaultServeMux if nil
-	Dict         *dict.Parser  // diameter dictionaries for this server
-	ReadTimeout  time.Duration // maximum duration before timing out read of the request
-	WriteTimeout time.Duration // maximum duration before timing out write of the response
-	TLSConfig    *tls.Config   // optional TLS config, used by ListenAndServeTLS
-	LocalAddr    net.Addr      // optional Local Address to bind dailer's (Dail...) socket to
+	Network         string          // network of the address - empty string defaults to tcp
+	Addr            string          // address to listen on, ":3868" if empty
+	Handler         Handler         // handler to invoke, DefaultServeMux if nil
+	Dict            *dict.Parser    // diameter dictionaries for this server
+	ReadTimeout     time.Duration   // maximum duration before timing out read of the request
+	WriteTimeout    time.Duration   // maximum duration before timing out write of the response
+	TLSConfig       *tls.Config     // optional TLS config, used by ListenAndServeTLS
+	LocalAddr       net.Addr        // optional Local Address to bind dailer's (Dail...) socket to
+	ReadMessageHook ReadMessageHook // optional Called right before ReadMessage method.
 }
 
 // serverHandler delegates to either the server's Handler or DefaultServeMux.
