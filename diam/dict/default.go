@@ -1613,8 +1613,8 @@ var gxcreditcontrolXML = `<?xml version="1.0" encoding="UTF-8"?>
                 <rule avp="PCC-Rule-Status" required="false" max="1"/>
                 <rule avp="Rule-Failure-Code" required="false" max="1"/>
                 <rule avp="Final-Unit-Indication" required="false" max="1"/>
-                <rule avp="RAN-NAS-Release-Cause" required="false" max="1"/>
-                <rule avp="Content-Version" required="false" max="1"/>
+                <rule avp="RAN-NAS-Release-Cause" required="false"/>
+                <rule avp="Content-Version" required="false"/>
 			</grouped>
 		</avp>
 
