@@ -1565,7 +1565,7 @@ var gxcreditcontrolXML = `<?xml version="1.0" encoding="UTF-8"?>
             </data>
         </avp>
 
-        <avp name="TGPP-SGSN-IPv6-Address" code="15" must="V" may="P" may-encrypt="y" vendor-id="10415">
+        <avp name="TGPP-SGSN-IPv6-Address" code="15" must="V" may="P" may-encrypt="Y" vendor-id="10415">
 			<!-- 3GPP TS 29.061 -->
 			<data type="OctetString"/>
 		</avp>
