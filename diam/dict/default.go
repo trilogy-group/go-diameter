@@ -1669,6 +1669,11 @@ var gxcreditcontrolXML = `<?xml version="1.0" encoding="UTF-8"?>
 			</data>
 		</avp>
 
+        <avp name="Content-Version" code="552" vendor-id="10415" must="V" may-encrypt="Y">
+			<!-- 3GPP TS 29.214 5.3.49 -->
+			<data type="Unsigned32"/>
+		</avp>
+
     </application>
 </diameter>`
 
