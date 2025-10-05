@@ -158,6 +158,7 @@ const (
 	ContentProviderID                          = 2117
 	ContentSize                                = 1206
 	ContentType                                = 826
+	ContentVersion                             = 552
 	ContextIdentifier                          = 1423
 	CostInformation                            = 423
 	CostUnit                                   = 424
