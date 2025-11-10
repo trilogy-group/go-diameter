@@ -470,6 +470,7 @@ const (
 	PriorityLevel                              = 1046
 	ProductName                                = 269
 	Prompt                                     = 76
+	ProviderID                                 = 10001
 	ProxyHost                                  = 280
 	ProxyInfo                                  = 284
 	ProxyState                                 = 33
