@@ -22,9 +22,7 @@ if [ -z "$SED" ]; then
 fi
 
 if [ -z "$SORT_FLAG_IGNORE_CASE" ]; then
-	if [ "$os" = "Darwin" ]; then
-		SORT_FLAG_IGNORE_CASE="-f"
-	fi
+	SORT_FLAG_IGNORE_CASE="-f"
 fi
 
 dict=dict/testdata/*.xml
@@ -50,7 +48,7 @@ cat $dict | "$SED" \
 	-ne 's/.*command code="\(.*\)" .* name="\(.*\)".*/\2 = \1/p' \
 	| sort -u >> $src
 
-echo ')\n// Short Command Names\nconst (\n' >> $src
+printf ')\n// Short Command Names\nconst (\n' >> $src
 
 cat $dict | "$SED" \
 	-e 's/-//g' \
@@ -81,7 +79,7 @@ cat $dict | "$SED" \
     -ne 's/\s*<application\s*id="\([0-9]*\)".*name="\(.*\)".*/\U\2_APP_ID = \1/p' \
     | sort -u | sort -nk 3 >> $src
 
-echo ')\n' >> $src
+printf ')\n' >> $src
 go fmt $src
 
 ## Generate avp/codes.go
@@ -104,9 +102,10 @@ cat $dict | "$SED" \
 	-e 's/-Id\([-"s]\)/-ID\1/g' \
 	-e 's/-//g' \
 	-ne 's/.*avp name="\(.*\)" code="\([0-9]*\)".*/\1 = \2/p' \
+	| "$SED" -e 's/^5G/FiveG/' \
 	| LC_COLLATE=C sort -u $SORT_FLAG_IGNORE_CASE >> $src
 
-echo ')\n' >> $src
+printf ')\n' >> $src
 
 go fmt $src
 
@@ -139,8 +138,10 @@ func init() {
 		{"Gx Charging Control", gxcreditcontrolXML},
 		{"Network Access Server", networkaccessserverXML},
 		{"TGPP", tgpprorfXML},
+		{"TGPP_Rx", tgpprxXML},
 		{"TGPP_S6a", tgpps6aXML},
 		{"TGPP_Swx", tgppswxXML},
+		{"Sy Interface", diametersyXML},
 	}
 	var err error
 	Default, err = NewParser()

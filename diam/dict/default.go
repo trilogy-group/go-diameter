@@ -1103,7 +1103,7 @@ var diametersyXML = `<?xml version="1.0" encoding="UTF-8"?>
 				<rule avp="Pending-Policy-Counter-Information" required="false"/>
 			</data>
 		</avp>
-		<avp name="Pending-Policy-Counter-Information" code="2905 " must="M" may="P" must-not="V" may-encrypt="-" vendor-id="10415">
+		<avp name="Pending-Policy-Counter-Information" code="2905" must="M" may="P" must-not="V" may-encrypt="-" vendor-id="10415">
 			<data type="Grouped">
 				<rule avp="Policy-Counter-Status" required="true" max="1"/>
 				<rule avp="Pending-Policy-Counter-Change-Time" required="true" max="1"/>
@@ -7594,7 +7594,7 @@ var tgpprxXML = `<?xml version="1.0" encoding="UTF-8"?>
             		</data>
         	</avp>
 
-		<avp name="Reservation-Priority" code="458" vendor-id="10415" must="V" may-encrypt="Y">
+		<avp name="Reservation-Priority" code="458" vendor-id="13019" must="V" may-encrypt="Y">
             		<data type="Enumerated">
                 		<item code="0" name="DEFAULT"/>
                 		<item code="1" name="PRIORITY-ONE"/>
@@ -8015,7 +8015,7 @@ var tgpprxXML = `<?xml version="1.0" encoding="UTF-8"?>
         	    	<data type="Time"/>
 	        </avp>
 
-		<avp name="RAN-NAS-Release-Cause" code="2819" must="V" may="P" must-not="M" may-encrypt="Y">
+		<avp name="RAN-NAS-Release-Cause" code="2819" vendor-id="10415" must="V" may="P" must-not="M" may-encrypt="Y">
         	    	<data type="OctetString"/>
 	        </avp>
 
