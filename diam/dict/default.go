@@ -6881,7 +6881,7 @@ var tgpprxXML = `<?xml version="1.0" encoding="UTF-8"?>
 				<rule avp="Supported-Features" required="false"/>
 				<rule avp="Reservation-Priority" required="false" max="1"/>
 				<rule avp="Framed-IP-Address" required="false" max="1"/>
-				<rule avp="Framed-Ipv6-Prefix" required="false" max="1"/>
+				<rule avp="Framed-IPv6-Prefix" required="false" max="1"/>
 				<rule avp="Called-Station-Id" required="false" max="1"/>
 				<rule avp="Service-URN" required="false" max="1"/>
 				<rule avp="Sponsored-Connectivity-Data " required="false" max="1"/>
@@ -8042,7 +8042,7 @@ var tgpprxXML = `<?xml version="1.0" encoding="UTF-8"?>
         	    	<data type="Grouped"/>
 	        </avp>
 
-		<avp name="Framed-Ipv6-Prefix" code="97" must="M" may-encrypt="Y">
+		<avp name="Framed-IPv6-Prefix" code="97" must="M" may-encrypt="Y">
             		<data type="OctetString"/>
 	        </avp>
 	
