@@ -134,8 +134,9 @@ func successCEA(sm *StateMachine, c diam.Conn, m *diam.Message, cer *smparser.CE
 	// Fix for Same H2H and E2E Identifier in success response
 	a.Header.HopByHopID = m.Header.HopByHopID
 	a.Header.EndToEndID = m.Header.EndToEndID
-	a.NewAVP(avp.OriginHost, avp.Mbit, 0, sm.cfg.OriginHost)
-	a.NewAVP(avp.OriginRealm, avp.Mbit, 0, sm.cfg.OriginRealm)
+	originHost, originRealm := ceaIdentity(sm, cer.Applications())
+	a.NewAVP(avp.OriginHost, avp.Mbit, 0, originHost)
+	a.NewAVP(avp.OriginRealm, avp.Mbit, 0, originRealm)
 	for _, hostAddress := range hostAddresses {
 		a.NewAVP(avp.HostIPAddress, avp.Mbit, 0, hostAddress)
 	}
@@ -145,6 +146,9 @@ func successCEA(sm *StateMachine, c diam.Conn, m *diam.Message, cer *smparser.CE
 		a.AddAVP(cer.OriginStateID)
 	}
 	for _, app := range sm.supportedApps {
+		if !isCEAAdvertisedApp(app.ID) {
+			continue
+		}
 		var typ uint32
 		switch app.AppType {
 		case "auth":
@@ -172,4 +176,43 @@ func successCEA(sm *StateMachine, c diam.Conn, m *diam.Message, cer *smparser.CE
 		_, err = answer.WriteTo(conn)
 		return err
 	})(c, a)
+}
+
+// isCEAAdvertisedApp reports whether an application is advertised in the CEA.
+// Only the applications this adapter actually supports are advertised; every
+// other application present in the loaded dictionary is omitted.
+func isCEAAdvertisedApp(id uint32) bool {
+	switch id {
+	case diam.CHARGING_CONTROL_APP_ID, // Gy (4)
+		diam.RX_APP_ID,                  // Rx (16777236)
+		diam.GX_CHARGING_CONTROL_APP_ID, // Gx (16777238)
+		diam.DIAMETER_SY_APP_ID:         // Sy (16777302)
+		return true
+	}
+	return false
+}
+
+// ceaIdentity selects the Origin-Host/Origin-Realm for the CEA. When PcrfHost
+// and PcrfRealm are configured and the CER requests exclusively Gx and/or Rx
+// applications, the PCRF identity is advertised; otherwise the default
+// OriginHost/OriginRealm is used.
+func ceaIdentity(sm *StateMachine, requestedApps []uint32) (datatype.DiameterIdentity, datatype.DiameterIdentity) {
+	if len(sm.cfg.PcrfHost) > 0 && len(sm.cfg.PcrfRealm) > 0 && onlyPcrfApps(requestedApps) {
+		return sm.cfg.PcrfHost, sm.cfg.PcrfRealm
+	}
+	return sm.cfg.OriginHost, sm.cfg.OriginRealm
+}
+
+// onlyPcrfApps reports whether the requested applications are non-empty and
+// consist exclusively of Gx and/or Rx.
+func onlyPcrfApps(requestedApps []uint32) bool {
+	if len(requestedApps) == 0 {
+		return false
+	}
+	for _, id := range requestedApps {
+		if id != diam.GX_CHARGING_CONTROL_APP_ID && id != diam.RX_APP_ID {
+			return false
+		}
+	}
+	return true
 }
