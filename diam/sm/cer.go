@@ -134,7 +134,10 @@ func successCEA(sm *StateMachine, c diam.Conn, m *diam.Message, cer *smparser.CE
 	// Fix for Same H2H and E2E Identifier in success response
 	a.Header.HopByHopID = m.Header.HopByHopID
 	a.Header.EndToEndID = m.Header.EndToEndID
-	originHost, originRealm := ceaIdentity(sm, cer.Applications())
+	originHost, originRealm := sm.cfg.OriginHost, sm.cfg.OriginRealm
+	if len(sm.cfg.PcrfHost) > 0 && len(sm.cfg.PcrfRealm) > 0 && requestsOnlyPcrfApps(cer.Applications()) {
+		originHost, originRealm = sm.cfg.PcrfHost, sm.cfg.PcrfRealm
+	}
 	a.NewAVP(avp.OriginHost, avp.Mbit, 0, originHost)
 	a.NewAVP(avp.OriginRealm, avp.Mbit, 0, originRealm)
 	for _, hostAddress := range hostAddresses {
@@ -146,7 +149,7 @@ func successCEA(sm *StateMachine, c diam.Conn, m *diam.Message, cer *smparser.CE
 		a.AddAVP(cer.OriginStateID)
 	}
 	for _, app := range sm.supportedApps {
-		if !isCEAAdvertisedApp(app.ID) {
+		if !ceaAdvertisedApps[app.ID] {
 			continue
 		}
 		var typ uint32
@@ -178,34 +181,19 @@ func successCEA(sm *StateMachine, c diam.Conn, m *diam.Message, cer *smparser.CE
 	})(c, a)
 }
 
-// isCEAAdvertisedApp reports whether an application is advertised in the CEA.
-// Only the applications this adapter actually supports are advertised; every
-// other application present in the loaded dictionary is omitted.
-func isCEAAdvertisedApp(id uint32) bool {
-	switch id {
-	case diam.CHARGING_CONTROL_APP_ID, // Gy (4)
-		diam.RX_APP_ID,                  // Rx (16777236)
-		diam.GX_CHARGING_CONTROL_APP_ID, // Gx (16777238)
-		diam.DIAMETER_SY_APP_ID:         // Sy (16777302)
-		return true
-	}
-	return false
+// ceaAdvertisedApps is the set of applications this adapter supports and
+// therefore advertises in the CEA; every other application in the dictionary
+// is omitted.
+var ceaAdvertisedApps = map[uint32]bool{
+	diam.CHARGING_CONTROL_APP_ID:    true, // Gy
+	diam.RX_APP_ID:                  true, // Rx
+	diam.GX_CHARGING_CONTROL_APP_ID: true, // Gx
+	diam.DIAMETER_SY_APP_ID:         true, // Sy
 }
 
-// ceaIdentity selects the Origin-Host/Origin-Realm for the CEA. When PcrfHost
-// and PcrfRealm are configured and the CER requests exclusively Gx and/or Rx
-// applications, the PCRF identity is advertised; otherwise the default
-// OriginHost/OriginRealm is used.
-func ceaIdentity(sm *StateMachine, requestedApps []uint32) (datatype.DiameterIdentity, datatype.DiameterIdentity) {
-	if len(sm.cfg.PcrfHost) > 0 && len(sm.cfg.PcrfRealm) > 0 && onlyPcrfApps(requestedApps) {
-		return sm.cfg.PcrfHost, sm.cfg.PcrfRealm
-	}
-	return sm.cfg.OriginHost, sm.cfg.OriginRealm
-}
-
-// onlyPcrfApps reports whether the requested applications are non-empty and
-// consist exclusively of Gx and/or Rx.
-func onlyPcrfApps(requestedApps []uint32) bool {
+// requestsOnlyPcrfApps reports whether the CER requested applications and every
+// one of them is Gx or Rx.
+func requestsOnlyPcrfApps(requestedApps []uint32) bool {
 	if len(requestedApps) == 0 {
 		return false
 	}

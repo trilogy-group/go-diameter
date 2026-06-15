@@ -53,10 +53,8 @@ type Settings struct {
 	VendorID    datatype.Unsigned32
 	ProductName datatype.UTF8String
 
-	// PcrfHost and PcrfRealm are advertised as Origin-Host/Origin-Realm in the
-	// CEA when the peer's CER requests only Gx and/or Rx applications. When set
-	// and the CER requests exclusively Gx/Rx, these replace OriginHost/OriginRealm
-	// in the successful CEA. When unset, OriginHost/OriginRealm are always used.
+	// PcrfHost and PcrfRealm, when set, are advertised as Origin-Host/Origin-Realm
+	// in the CEA if the CER requests only Gx and/or Rx.
 	PcrfHost  datatype.DiameterIdentity
 	PcrfRealm datatype.DiameterIdentity
 
