@@ -380,6 +380,15 @@
             </data>
         </avp>
 
+        <avp name="Bearer-Control-Mode" code="1023" must="M,V" may="P" may-encrypt="y" vendor-id="10415">
+            <!-- 3GPP 29.212 Section 5.3.23 -->
+            <data type="Enumerated">
+                <item code="0" name="UE_only"/>
+                <item code="1" name="RESERVED"/>
+                <item code="2" name="UE_NW"/>
+            </data>
+        </avp>
+
         <avp name="TGPP-SGSN-Address" code="6" must="V" may="P" must-not="M" may-encrypt="y" vendor-id="10415">
             <!-- 3GPP 29.061 Table 9a -->
             <data type="OctetString"/>
