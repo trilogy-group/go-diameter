@@ -134,8 +134,12 @@ func successCEA(sm *StateMachine, c diam.Conn, m *diam.Message, cer *smparser.CE
 	// Fix for Same H2H and E2E Identifier in success response
 	a.Header.HopByHopID = m.Header.HopByHopID
 	a.Header.EndToEndID = m.Header.EndToEndID
-	a.NewAVP(avp.OriginHost, avp.Mbit, 0, sm.cfg.OriginHost)
-	a.NewAVP(avp.OriginRealm, avp.Mbit, 0, sm.cfg.OriginRealm)
+	originHost, originRealm := sm.cfg.OriginHost, sm.cfg.OriginRealm
+	if len(sm.cfg.PcrfHost) > 0 && len(sm.cfg.PcrfRealm) > 0 && requestsOnlyPcrfApps(cer.Applications()) {
+		originHost, originRealm = sm.cfg.PcrfHost, sm.cfg.PcrfRealm
+	}
+	a.NewAVP(avp.OriginHost, avp.Mbit, 0, originHost)
+	a.NewAVP(avp.OriginRealm, avp.Mbit, 0, originRealm)
 	for _, hostAddress := range hostAddresses {
 		a.NewAVP(avp.HostIPAddress, avp.Mbit, 0, hostAddress)
 	}
@@ -145,6 +149,9 @@ func successCEA(sm *StateMachine, c diam.Conn, m *diam.Message, cer *smparser.CE
 		a.AddAVP(cer.OriginStateID)
 	}
 	for _, app := range sm.supportedApps {
+		if !ceaAdvertisedApps[app.ID] {
+			continue
+		}
 		var typ uint32
 		switch app.AppType {
 		case "auth":
@@ -172,4 +179,28 @@ func successCEA(sm *StateMachine, c diam.Conn, m *diam.Message, cer *smparser.CE
 		_, err = answer.WriteTo(conn)
 		return err
 	})(c, a)
+}
+
+// ceaAdvertisedApps is the set of applications this adapter supports and
+// therefore advertises in the CEA; every other application in the dictionary
+// is omitted.
+var ceaAdvertisedApps = map[uint32]bool{
+	diam.CHARGING_CONTROL_APP_ID:    true, // Gy
+	diam.RX_APP_ID:                  true, // Rx
+	diam.GX_CHARGING_CONTROL_APP_ID: true, // Gx
+	diam.DIAMETER_SY_APP_ID:         true, // Sy
+}
+
+// requestsOnlyPcrfApps reports whether the CER requested applications and every
+// one of them is Gx or Rx.
+func requestsOnlyPcrfApps(requestedApps []uint32) bool {
+	if len(requestedApps) == 0 {
+		return false
+	}
+	for _, id := range requestedApps {
+		if id != diam.GX_CHARGING_CONTROL_APP_ID && id != diam.RX_APP_ID {
+			return false
+		}
+	}
+	return true
 }
