@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/fiorix/go-diameter/v4/diam"
+	"github.com/fiorix/go-diameter/v4/diam/datatype"
 )
 
 func requireSCTP(t *testing.T) {
@@ -36,5 +37,13 @@ func testClient_Handshake_CustomIP_SCTP(t *testing.T) {
 // completed and that the RAR handler has context from the peer.
 func TestStateMachineSCTP(t *testing.T) {
 	requireSCTP(t)
-	testStateMachine(t, "sctp")
+	// SCTP sockets are multi-homed: on a host with a non-loopback address
+	// (e.g. CI runners) getLocalAddresses() prefers the real address over
+	// loopback, so the auto-detected Host-IP-Address would not match the
+	// loopback value testStateMachine's expected CEA asserts. Pin it to
+	// loopback for this run (a local copy, so the shared serverSettings and
+	// the TCP test are untouched).
+	settings := *serverSettings
+	settings.HostIPAddresses = []datatype.Address{localhostAddress}
+	testStateMachine(t, "sctp", &settings)
 }

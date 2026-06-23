@@ -32,15 +32,15 @@ func testResultCode(m *diam.Message, want uint32) bool {
 // sends a Re-Auth-Request message to ensure the handshake was
 // completed and that the RAR handler has context from the peer.
 func TestStateMachineTCP(t *testing.T) {
-	testStateMachine(t, "tcp")
+	testStateMachine(t, "tcp", serverSettings)
 }
 
 // / TestStateMachine establishes a connection with a test server and
 // sends a Re-Auth-Request message to ensure the handshake was
 // completed and that the RAR handler has context from the peer.
-func testStateMachine(t *testing.T, network string) {
-	sm := New(serverSettings)
-	if sm.Settings() != serverSettings {
+func testStateMachine(t *testing.T, network string, settings *Settings) {
+	sm := New(settings)
+	if sm.Settings() != settings {
 		t.Fatal("Invalid settings")
 	}
 	srv := diamtest.NewServerNetwork(network, sm, dict.Default)
