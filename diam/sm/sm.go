@@ -102,6 +102,23 @@ type Settings struct {
 	// peer has passed the handshake) before the state machine responds
 	// with DWA. Same semantics as OnCER.
 	OnDWR diam.HandlerFunc
+
+	// OnCEA, if non-nil, is invoked on the server immediately before a CEA
+	// is sent, after the message has been fully constructed. It fires for
+	// both the success CEA and the error CEA. Useful for logging or metrics.
+	// Mutating the message is permitted but discouraged. The hook runs in
+	// the goroutine handling the CER, so it must be cheap; spawn a goroutine
+	// for long-running work. The hook is observe-only on the connection: do
+	// not write to it. If the hook spawns a goroutine, that goroutine must
+	// not retain or touch the message after the hook returns — the state
+	// machine writes it to the wire immediately afterwards, so copy out any
+	// needed data synchronously first. Same semantics as OnCER.
+	OnCEA diam.HandlerFunc
+
+	// OnDWA, if non-nil, is invoked on the server immediately before a DWA
+	// is sent in response to a peer DWR, after the message has been fully
+	// constructed. Useful for logging or metrics. Same semantics as OnCEA.
+	OnDWA diam.HandlerFunc
 }
 
 var (

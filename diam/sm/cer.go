@@ -105,6 +105,10 @@ func errorCEA(sm *StateMachine, c diam.Conn, m *diam.Message, cer *smparser.CER,
 		a.NewAVP(avp.FirmwareRevision, 0, 0, sm.cfg.FirmwareRevision)
 	}
 
+	if sm.cfg.OnCEA != nil {
+		sm.cfg.OnCEA(c, a)
+	}
+
 	return sm.cfg.AnswerHandlerProxy(func(conn diam.Conn, answer *diam.Message) error {
 		_, err = answer.WriteTo(conn)
 		if err != nil {
@@ -173,6 +177,10 @@ func successCEA(sm *StateMachine, c diam.Conn, m *diam.Message, cer *smparser.CE
 	}
 	if sm.cfg.FirmwareRevision != 0 {
 		a.NewAVP(avp.FirmwareRevision, 0, 0, sm.cfg.FirmwareRevision)
+	}
+
+	if sm.cfg.OnCEA != nil {
+		sm.cfg.OnCEA(c, a)
 	}
 
 	return sm.cfg.AnswerHandlerProxy(func(conn diam.Conn, answer *diam.Message) error {

@@ -40,6 +40,10 @@ func handleDWR(sm *StateMachine) diam.HandlerFunc {
 			m.NewAVP(avp.OriginStateID, avp.Mbit, 0, stateid)
 		}
 
+		if sm.cfg.OnDWA != nil {
+			sm.cfg.OnDWA(c, a)
+		}
+
 		sm.cfg.AnswerHandlerProxy(func(conn diam.Conn, answer *diam.Message) error {
 			_, err = answer.WriteTo(conn)
 			if err != nil {
