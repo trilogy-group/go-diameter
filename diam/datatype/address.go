@@ -16,25 +16,30 @@ type Address []byte
 
 // DecodeAddress decodes an Address data type from byte array.
 func DecodeAddress(b []byte) (Type, error) {
+	d := make([]byte, len(b))
+	copy(d, b)
 	if len(b) < 3 {
-		return nil, fmt.Errorf("Not enough data to make an Address from byte[%d] = %+v", len(b), b)
+		return Address{}, fmt.Errorf("Not enough data to make an Address from byte[%d] = %+v", len(b), b)
 	}
 	if binary.BigEndian.Uint16(b[:2]) == 0 || binary.BigEndian.Uint16(b[:2]) == 65535 {
-		return nil, errors.New("Invalid address type received")
+		return Address{}, errors.New("Invalid address type received")
 	}
 	switch binary.BigEndian.Uint16(b[:2]) {
 	case 0x01:
 		if len(b[2:]) != 4 {
-			return nil, errors.New("Invalid length for IPv4")
+			return Address{}, errors.New("Invalid length for IPv4")
 		}
 	case 0x02:
 		if len(b[2:]) != 16 {
-			return nil, errors.New("Invalid length for IPv6")
+			return Address{}, errors.New("Invalid length for IPv6")
 		}
 	default:
-		return Address(b), nil
+		// Preserve the full slice (family prefix + value) for unknown
+		// address families so Serialize can round-trip them untouched.
+		return Address(d), nil
 	}
-	return Address(b[2:]), nil
+	// IPv4/IPv6: strip the 2-byte address family prefix.
+	return Address(d[2:]), nil
 }
 
 // Serialize implements the Type interface.
@@ -49,6 +54,7 @@ func (addr Address) Serialize() []byte {
 		b[1] = 0x02
 		copy(b[2:], addr)
 	} else {
+		// Non-IP: addr already contains the family prefix from decode.
 		b = make([]byte, len(addr))
 		copy(b, addr)
 	}
@@ -58,24 +64,16 @@ func (addr Address) Serialize() []byte {
 // Len implements the Type interface.
 func (addr Address) Len() int {
 	if ip4 := net.IP(addr).To4(); ip4 != nil {
-		return len(ip4) + 2 // two bytes from the address family
+		return len(ip4) + 2
 	} else if ip6 := net.IP(addr).To16(); ip6 != nil {
-		return len(ip6) + 2 // two bytes from the address family
-	} else {
-		return len(addr)
+		return len(ip6) + 2
 	}
+	return len(addr) // family prefix is already in the slice
 }
 
 // Padding implements the Type interface.
 func (addr Address) Padding() int {
-	var l int
-	if ip4 := net.IP(addr).To4(); ip4 != nil {
-		l = len(ip4) + 2 // two bytes from the address family
-	} else if ip6 := net.IP(addr).To16(); ip6 != nil {
-		l = len(ip6) + 2 // two bytes from the address family
-	} else {
-		l = len(addr)
-	}
+	l := addr.Len()
 	return pad4(l) - l
 }
 
@@ -92,5 +90,12 @@ func (addr Address) String() string {
 	if ip6 := net.IP(addr).To16(); ip6 != nil {
 		return fmt.Sprintf("Address{%s},Padding:%d", net.IP(addr), addr.Padding())
 	}
-	return fmt.Sprintf("Address{%#v}, Type{%#v} Padding:%d", addr[2:], addr[:2], addr.Padding())
+	if len(addr) < 2 {
+		return fmt.Sprintf("Address{%#v},Padding:%d", []byte(addr), addr.Padding())
+	}
+	// Non-IP (e.g. E.164): show the value as a readable string and the
+	// family as raw bytes. Fixes #201 where decoded E.164 values printed
+	// as "\x00\x08<number>".
+	return fmt.Sprintf("Address{%s},Type{%#v},Padding:%d",
+		string(addr[2:]), []byte(addr[:2]), addr.Padding())
 }

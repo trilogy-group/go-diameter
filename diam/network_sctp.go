@@ -27,8 +27,8 @@ const (
 
 	// DiameterPPID - SCTP Payload Protocol Identifier for Diameter
 	// see: https://tools.ietf.org/html/rfc4960#section-14.4 and https://tools.ietf.org/html/rfc6733#page-24
-	// Value of PPID must be in network byte order (https://tools.ietf.org/html/rfc6458 Section 5.3.2)
-	DiameterPPID uint32 = 46 << 24
+	// Value of PPID in network byte order is implicitly handled in the SCTP package using htonl() (https://tools.ietf.org/html/rfc6458 Section 5.3.2)
+	DiameterPPID uint32 = 46
 )
 
 type sctpDialer struct {
@@ -110,6 +110,9 @@ func NewSCTPConn(sctpConn *sctp.SCTPConn) MultistreamConn {
 		return nil
 	}
 	sctpConn.SubscribeEvents(sctp.SCTP_EVENT_DATA_IO)
+	// Disable Nagle-like buffering so small Diameter messages are sent immediately.
+	noDelay := 1
+	sctpConn.Setsockopt(sctp.SCTP_NODELAY, uintptr(unsafe.Pointer(&noDelay)), unsafe.Sizeof(noDelay))
 	return &SCTPConn{SCTPConn: sctpConn, s: &streams{}, currStream: InvalidStreamID, writerStream: InvalidStreamID}
 }
 
@@ -343,10 +346,10 @@ func (msc *SCTPConn) Read(b []byte) (n int, err error) {
 
 // Write writes data to the association while maintaining stream continuity.
 // The write stream will be selected in the following order:
-//   1) If current write stream is set (is not InvalidStreamID), it'll be used for writing.
-//   2) If current read stream is set, it'll be used for writing.
-//   3) If neither current write nor current read streams are set, write will use default
-//      protocol stream (0 for the current SCTP implementation).
+//  1. If current write stream is set (is not InvalidStreamID), it'll be used for writing.
+//  2. If current read stream is set, it'll be used for writing.
+//  3. If neither current write nor current read streams are set, write will use default
+//     protocol stream (0 for the current SCTP implementation).
 func (msc *SCTPConn) Write(b []byte) (int, error) {
 	msc.wmu.RLock() // block changes to msc.writerStream during write
 	defer msc.wmu.RUnlock()
@@ -389,13 +392,14 @@ func (d sctpSingleStreamDialer) Dial(network, address string) (net.Conn, error) 
 		return nil, err
 	}
 
-	return sctp.DialSCTPExt(
+	conn, err := sctp.DialSCTPExt(
 		network,
 		d.LocalAddr,
 		sctpAddr,
 		sctp.InitMsg{
 			NumOstreams:  MaxOutboundSCTPStreams,
 			MaxInstreams: MaxInboundSCTPStreams})
+	return NewSCTPConn(conn), err
 }
 
 // Accept implements the Accept method in the listener interface for sctpListener (see: MultistreamListen).

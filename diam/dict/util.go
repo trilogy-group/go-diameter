@@ -26,8 +26,6 @@ var parentAppIds map[uint32]uint32 = map[uint32]uint32{
 // Apps return a list of all applications loaded in the Parser object.
 // Apps must never be called concurrently with LoadFile or Load.
 func (p *Parser) Apps() []*App {
-	//p.mu.Lock()
-	//defer p.mu.Unlock()
 	var apps []*App
 	for _, f := range p.file {
 		for _, app := range f.App {
@@ -82,8 +80,6 @@ func MakeUnknownAVP(appid, code, vendorID uint32) *AVP {
 //
 // FindAVPWithVendor must never be called concurrently with LoadFile or Load.
 func (p *Parser) FindAVPWithVendor(appid uint32, code interface{}, vendorID uint32) (*AVP, error) {
-	//p.mu.Lock()
-	//defer p.mu.Unlock()
 	var (
 		avp *AVP
 		ok  bool
@@ -124,11 +120,41 @@ retry:
 		goto retry
 	} else {
 		if codeU32, isUint32 := code.(uint32); isUint32 {
+			if vendorID != UndefinedVendorID {
+				avp, err = p.FindAVP(origAppID, codeU32)
+				if err == nil {
+					return avp, nil
+				}
+			}
 			return MakeUnknownAVP(origAppID, codeU32, vendorID), err
 		}
 	}
 
 	return nil, err
+}
+
+// FindAVPByCode is a fast-path lookup that takes typed uint32 arguments,
+// avoiding the interface{} boxing and type switch overhead of FindAVPWithVendor.
+// It is intended for the hot decode path where code is always uint32.
+//
+// Because inherited AVPs are pre-merged into child app indices at load time,
+// this method resolves most lookups with a single map access.
+//
+// FindAVPByCode must never be called concurrently with LoadFile or Load.
+func (p *Parser) FindAVPByCode(appid, code, vendorID uint32) (*AVP, error) {
+	// Primary lookup — covers both app-specific and inherited AVPs
+	// thanks to mergeInheritedAVPs() called at load time.
+	if avp, ok := p.avpcode[codeIdx{appid, code, vendorID}]; ok {
+		return avp, nil
+	}
+	// Fallback: if a specific vendorID was given, retry with UndefinedVendorID.
+	if vendorID != UndefinedVendorID {
+		if avp, ok := p.avpcode[codeIdx{appid, code, UndefinedVendorID}]; ok {
+			return avp, nil
+		}
+	}
+	return MakeUnknownAVP(appid, code, vendorID),
+		fmt.Errorf("Could not find AVP %d for Vendor: %d", code, vendorID)
 }
 
 // FindAVP is a helper function that returns a pre-loaded AVP from the Parser.

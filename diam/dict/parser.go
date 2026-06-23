@@ -40,6 +40,14 @@ type Parser struct {
 	command map[codeIdx]*Command  // Command index
 	mu      sync.Mutex            // Protects all maps
 	once    sync.Once
+
+	// Strict indicates whether an error should be returned when one  or more
+	// AVPs are invalid/empty and cannot be properly decoded.
+	//
+	// Defaults to true. When set to false, all decoding errors found during the
+	// parsing process will be stored in the Message's DecodeErr field which is
+	// accessible from a request handler.
+	Strict bool
 }
 
 type codeIdx struct {
@@ -62,6 +70,7 @@ type appIdTypeIdx struct {
 // NewParser allocates a new Parser optionally loading dictionary XML files.
 func NewParser(filename ...string) (*Parser, error) {
 	p := new(Parser)
+	p.Strict = true
 	var err error
 	for _, f := range filename {
 		if err = p.LoadFile(f); err != nil {
@@ -126,7 +135,100 @@ func (p *Parser) Load(r io.Reader) error {
 			}
 		}
 	}
+	// Pre-merge inherited AVPs so that lookups for child apps resolve in a
+	// single map access instead of walking the parent chain at runtime.
+	p.mergeInheritedAVPs()
 	return nil
+}
+
+// mergeInheritedAVPs copies AVP entries from ancestor applications into
+// each child application's index. This eliminates the runtime fallback
+// loop in FindAVPByCode: every lookup becomes a single map access.
+//
+// For each application that has a parent chain (via parentAppIds) or
+// inherits from the base app (id=0), entries are copied only if the
+// child does not already define an AVP with the same code and vendorID.
+//
+// The iteration uses a pre-computed per-app snapshot of the index rather
+// than ranging over the live p.avpcode / p.avpname maps, so writes made
+// during the merge cannot affect iteration order or content within a
+// single call. Note that on repeated Load calls the snapshot reads the
+// current live index, which already contains entries synthesized by
+// earlier merges; those entries point at the real owning AVP, so the
+// guard at the insertion site keeps the result correct but this function
+// does not structurally separate "original" from "synthesized" sources.
+//
+// Memory: base AVPs are duplicated per child app at Load time,
+// not per message; bounded by dictionary size.
+func (p *Parser) mergeInheritedAVPs() {
+	// Collect every declared application so apps that inherit all their
+	// AVPs from an ancestor (and define none of their own) are still
+	// processed. Also include any appIDs that only appear as AVP owners.
+	apps := make(map[uint32]bool, len(p.appcode))
+	for appID := range p.appcode {
+		apps[appID] = true
+	}
+	for idx := range p.avpcode {
+		apps[idx.appID] = true
+	}
+
+	// Snapshot the current index grouped by owning appID. Subsequent
+	// writes to p.avpcode / p.avpname during the merge will not appear
+	// in these snapshots, so iteration order and content are stable.
+	type codeEntry struct {
+		idx codeIdx
+		avp *AVP
+	}
+	type nameEntry struct {
+		idx nameIdx
+		avp *AVP
+	}
+	codeByApp := make(map[uint32][]codeEntry, len(apps))
+	for idx, avp := range p.avpcode {
+		codeByApp[idx.appID] = append(codeByApp[idx.appID], codeEntry{idx, avp})
+	}
+	nameByApp := make(map[uint32][]nameEntry, len(apps))
+	for idx, avp := range p.avpname {
+		nameByApp[idx.appID] = append(nameByApp[idx.appID], nameEntry{idx, avp})
+	}
+
+	// For each app, walk its parent chain and copy missing entries.
+	for appID := range apps {
+		if appID == 0 {
+			continue // base app has no parents
+		}
+		// Build the ancestor chain: e.g. for app 4 → [1, 0]
+		var ancestors []uint32
+		cur := appID
+		for {
+			parent, hasParent := parentAppIds[cur]
+			if hasParent {
+				ancestors = append(ancestors, parent)
+				cur = parent
+			} else if cur != 0 {
+				ancestors = append(ancestors, 0)
+				break
+			} else {
+				break
+			}
+		}
+
+		// Copy AVPs from each ancestor (nearest first) into this app.
+		for _, ancestorID := range ancestors {
+			for _, e := range codeByApp[ancestorID] {
+				childIdx := codeIdx{appID, e.idx.code, e.idx.vendorID}
+				if _, exists := p.avpcode[childIdx]; !exists {
+					p.avpcode[childIdx] = e.avp
+				}
+			}
+			for _, e := range nameByApp[ancestorID] {
+				childIdx := nameIdx{appID, e.idx.name, e.idx.vendorID}
+				if _, exists := p.avpname[childIdx]; !exists {
+					p.avpname[childIdx] = e.avp
+				}
+			}
+		}
+	}
 }
 
 func updateType(a *AVP) error {

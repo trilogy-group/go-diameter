@@ -16,27 +16,17 @@ import (
 
 // parseAvpTag return the avp_name and omitempty option
 func parseAvpTag(tag reflect.StructTag) (string, bool) {
-	if tag == "" {
-		return "", false
-	}
-	name := string(tag)
-	if strings.HasPrefix(name, "avp:\"") {
-		name = name[5 : len(name)-1]
-		omitEmpty := false
-		if strings.HasSuffix(name, ",omitempty") {
-			name = name[0 : len(name)-10]
-			omitEmpty = true
-		}
-		if strings.IndexByte(name, '"') == -1 {
-			return name, omitEmpty
-		}
+	avpTagValue := tag.Get("avp")
+
+	avpName := avpTagValue
+	omitempty := false
+
+	if index := strings.Index(avpTagValue, ","); index != -1 {
+		avpName = avpTagValue[:index]
+		omitempty = strings.Index(avpTagValue[index+1:], "omitempty") != -1
 	}
 
-	name = tag.Get("avp")
-	if idx := strings.Index(name, ","); idx != -1 {
-		return name[:idx], false
-	}
-	return name, true
+	return avpName, omitempty
 }
 
 func isEmptyValue(v reflect.Value) bool {
@@ -95,15 +85,15 @@ func marshalStruct(m *Message, field reflect.Value) (error, []*AVP) {
 			continue
 		}
 
-		avpname, omitEmpty := parseAvpTag(bt.Tag)
-		if len(avpname) == 0 || (omitEmpty && isEmptyValue(f)) {
+		avpName, omitEmpty := parseAvpTag(bt.Tag)
+		if len(avpName) == 0 || (omitEmpty && isEmptyValue(f)) {
 			// TODO: check the required attribute in AVP rule?
 			continue
 		}
 
 		// Lookup the AVP name (tag) in the dictionary, the dictionary AVP has the code.
 		// Relies on the fact that in the same app will not be AVPs with same code but different vendorId
-		dictAVP, err = m.Dictionary().FindAVP(m.Header.ApplicationID, avpname)
+		dictAVP, err = m.Dictionary().FindAVP(m.Header.ApplicationID, avpName)
 		if err != nil {
 			return err, nil
 		}
@@ -121,11 +111,8 @@ func marshalStruct(m *Message, field reflect.Value) (error, []*AVP) {
 // marshal returns a AVP type of the field
 func marshal(m *Message, field reflect.Value, fieldAVP *dict.AVP) (error, []*AVP) {
 	var data datatype.Type
-	var avps []*AVP // avps := make([]*AVP, 0, 8)
+	var avps []*AVP
 	fieldType := field.Type()
-
-	// log.Println(fieldAVP.Name, " begin ", field.Kind())
-	// defer log.Println(fieldAVP.Name, " end")
 
 	var t reflect.Type
 	switch field.Kind() {
@@ -140,15 +127,12 @@ func marshal(m *Message, field reflect.Value, fieldAVP *dict.AVP) (error, []*AVP
 
 		// 2.  []*diam.AVP
 		if fieldType == reflect.TypeOf(([]*AVP)(nil)) {
-			// s := reflect.New(fieldType) // a pointer to a slice
-			// s.Elem().Set(field)
 			avp := field.Interface().([]*AVP)
 			avps = append(avps, avp...)
 			return nil, avps
 		}
 
 		// 3. real array of diameter AVPs
-		// log.Print("Slice len:", field.Len())
 		for n := 0; n < field.Len(); n++ {
 			err, avp := marshal(m, field.Index(n), fieldAVP)
 			if err != nil {

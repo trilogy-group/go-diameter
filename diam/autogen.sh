@@ -103,6 +103,7 @@ cat $dict | "$SED" \
 	-e 's/-//g' \
 	-ne 's/.*avp name="\(.*\)" code="\([0-9]*\)".*/\1 = \2/p' \
 	| "$SED" -e 's/^5G/FiveG/' \
+	| "$SED" -e 's/^[0-9]/X&/' \
 	| LC_COLLATE=C sort -u $SORT_FLAG_IGNORE_CASE >> $src
 
 printf ')\n' >> $src
@@ -140,6 +141,7 @@ func init() {
 		{"TGPP", tgpprorfXML},
 		{"TGPP_Rx", tgpprxXML},
 		{"TGPP_S6a", tgpps6aXML},
+		{"TGPP_S13", tgpps13XML},
 		{"TGPP_Swx", tgppswxXML},
 		{"Sy Interface", diametersyXML},
 	}

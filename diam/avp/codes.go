@@ -14,6 +14,7 @@ const (
 	AccessNetworkChargingIdentifier            = 502
 	AccessNetworkChargingIdentifierGx          = 1022
 	AccessNetworkChargingIdentifierValue       = 503
+	AccessNetworkInfoChange                    = 4401
 	AccessNetworkInformation                   = 1263
 	AccessRestrictionData                      = 1426
 	AccessTransferInformation                  = 2709
@@ -59,6 +60,8 @@ const (
 	AMBR                                       = 1435
 	ANGWAddress                                = 1050
 	ANID                                       = 1504
+	AnnouncementIdentifier                     = 3905
+	AnnouncementInformation                    = 3904
 	ANTrusted                                  = 1503
 	AoCCostInformation                         = 2053
 	AoCFormat                                  = 2310
@@ -110,6 +113,8 @@ const (
 	CallbackNumber                             = 19
 	CallBarringInfo                            = 1488
 	CalledAssertedIdentity                     = 1250
+	CalledIdentity                             = 3916
+	CalledIdentityChange                       = 3917
 	CalledPartyAddress                         = 832
 	CalledStationID                            = 30
 	CalleeInformation                          = 565
@@ -199,6 +204,8 @@ const (
 	DomainName                                 = 1200
 	DRMContent                                 = 1221
 	DRMP                                       = 301
+	DSAFlags                                   = 1422
+	DSRFlags                                   = 1421
 	DynamicAddressFlag                         = 2051
 	DynamicAddressFlagExtension                = 2068
 	EarlyMediaDescription                      = 1272
@@ -208,6 +215,7 @@ const (
 	EnvelopeStartTime                          = 1269
 	ePDGAddress                                = 3425
 	EPSSubscribedQoSProfile                    = 1431
+	EquipmentStatus                            = 1445
 	ErrorDiagnostic                            = 1614
 	ErrorMessage                               = 281
 	ErrorReportingHost                         = 294
@@ -296,6 +304,7 @@ const (
 	HPLMNODB                                   = 1418
 	ICSIndicator                               = 1491
 	IdleTimeout                                = 28
+	IDRFlags                                   = 1490
 	IMEI                                       = 1402
 	ImmediateResponsePreferred                 = 1412
 	IMSApplicationReferenceIdentifier          = 2601
@@ -318,6 +327,7 @@ const (
 	InterfaceText                              = 2005
 	InterfaceType                              = 2006
 	InterOperatorIdentifier                    = 838
+	InterUETransfer                            = 3902
 	IPCANSessionChargingScope                  = 2827
 	IPCANType                                  = 1027
 	IPDomainID                                 = 537
@@ -730,6 +740,7 @@ const (
 	TerminationCause                           = 295
 	TFTFilter                                  = 1012
 	TFTPacketFilterInformation                 = 1013
+	TGPP2MEID                                  = 1471
 	TGPPAAAServerName                          = 318
 	TGPPChargingCharacteristics                = 13
 	TGPPChargingID                             = 2

@@ -11,8 +11,8 @@ import (
 
 func TestApps(t *testing.T) {
 	apps := Default.Apps()
-	if len(apps) != 10 {
-		t.Fatalf("Unexpected # of apps. Want 10, have %d", len(apps))
+	if len(apps) != 11 {
+		t.Fatalf("Unexpected # of apps. Want 11, have %d", len(apps))
 	}
 	// Base protocol.
 	if apps[0].ID != 0 {
@@ -34,20 +34,25 @@ func TestApps(t *testing.T) {
 	if apps[4].ID != 1 {
 		t.Fatalf("Unexpected app.ID. Want 1, have %d", apps[4].ID)
 	}
-	// 3GPP S6a applications
+	// 3GPP Rx applications
 	if apps[6].ID != 16777236 {
 		t.Fatalf("Unexpected app.ID. Want 16777236, have %d", apps[6].ID)
 	}
+	// 3GPP S6a applications
 	if apps[7].ID != 16777251 {
 		t.Fatalf("Unexpected app.ID. Want 16777251, have %d", apps[7].ID)
 	}
-	if apps[8].ID != 16777265 {
-		t.Fatalf("Unexpected app.ID. Want 16777265, have %d", apps[8].ID)
+	// 3GPP S13 application
+	if apps[8].ID != 16777252 {
+		t.Fatalf("Unexpected app.ID. Want 16777252, have %d", apps[8].ID)
 	}
-
+	// 3GPP Swx applications
+	if apps[9].ID != 16777265 {
+		t.Fatalf("Unexpected app.ID. Want 16777265, have %d", apps[9].ID)
+	}
 	// Diameter Sy
-	if apps[9].ID != 16777302 {
-		t.Fatalf("Unexpected app.ID. Want 16777302, have %d", apps[9].ID)
+	if apps[10].ID != 16777302 {
+		t.Fatalf("Unexpected app.ID. Want 16777302, have %d", apps[10].ID)
 	}
 }
 
@@ -156,6 +161,19 @@ func TestRule(t *testing.T) {
 		t.Fatal(err)
 	} else if !rule.Required {
 		t.Errorf("Unexpected rule %#v", rule)
+	}
+}
+
+func TestFindAVPWithVendorNoInfiniteRecursion(t *testing.T) {
+	// Looking up a non-existent AVP with a specific vendor ID should return
+	// an Unknown AVP instead of causing infinite recursion between
+	// FindAVPWithVendor and FindAVP.
+	avp, _ := Default.FindAVPWithVendor(4, uint32(99999), 12345)
+	if avp == nil {
+		t.Fatal("Expected Unknown AVP, got nil")
+	}
+	if avp.Name != "Unknown-99999-12345" {
+		t.Fatalf("Expected Unknown-99999-12345 AVP, got %s", avp.Name)
 	}
 }
 
