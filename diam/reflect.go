@@ -14,19 +14,57 @@ import (
 	"github.com/fiorix/go-diameter/v4/diam/dict"
 )
 
-// parseAvpTag return the avp_name and omitempty option
+// parseAvpTag return the avp_name and omitempty option.
+//
+// ccab fork divergence from upstream fiorix (DALR T0, trilogy-group/ccab#16103).
+// Upstream v4.3.0 rewrote this so a bare `avp:"Name"` tag (no ",omitempty") is
+// treated as omitempty=false, serializing zero-valued fields. The fork's
+// adapters rely on the previous behavior, where a bare tag on a field that also
+// carries another struct tag (e.g. `json:"..."`) is treated as omitempty=true.
+// Adopting the upstream default would put invalid zero AVPs on the wire (e.g.
+// Result-Code{0} on an SLA), so the pre-v4.3.0 implementation is kept active to
+// keep marshalling byte-identical.
+//
+// The upstream v4.3.0 implementation is preserved verbatim, commented out
+// below. To retire this divergence during the de-fork: delete the active body
+// below, uncomment the upstream version, and add explicit ",omitempty" to each
+// affected struct field where a zero value must not be serialized.
+//
+//	func parseAvpTag(tag reflect.StructTag) (string, bool) {
+//		avpTagValue := tag.Get("avp")
+//
+//		avpName := avpTagValue
+//		omitempty := false
+//
+//		if index := strings.Index(avpTagValue, ","); index != -1 {
+//			avpName = avpTagValue[:index]
+//			omitempty = strings.Index(avpTagValue[index+1:], "omitempty") != -1
+//		}
+//
+//		return avpName, omitempty
+//	}
 func parseAvpTag(tag reflect.StructTag) (string, bool) {
-	avpTagValue := tag.Get("avp")
-
-	avpName := avpTagValue
-	omitempty := false
-
-	if index := strings.Index(avpTagValue, ","); index != -1 {
-		avpName = avpTagValue[:index]
-		omitempty = strings.Index(avpTagValue[index+1:], "omitempty") != -1
+	if tag == "" {
+		return "", false
+	}
+	name := string(tag)
+	if strings.HasPrefix(name, "avp:\"") {
+		name = name[5 : len(name)-1]
+		omitEmpty := false
+		if strings.HasSuffix(name, ",omitempty") {
+			name = name[0 : len(name)-10]
+			omitEmpty = true
+		}
+		if strings.IndexByte(name, '"') == -1 {
+			return name, omitEmpty
+		}
 	}
 
-	return avpName, omitempty
+	name = tag.Get("avp")
+	if idx := strings.Index(name, ","); idx != -1 {
+		return name[:idx], false
+	}
+	return name, true
 }
 
 func isEmptyValue(v reflect.Value) bool {
