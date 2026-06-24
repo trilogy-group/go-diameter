@@ -44,16 +44,13 @@ func handleDWR(sm *StateMachine) diam.HandlerFunc {
 			sm.cfg.OnDWA(c, a)
 		}
 
-		sm.cfg.AnswerHandlerProxy(func(conn diam.Conn, answer *diam.Message) error {
-			_, err = answer.WriteTo(conn)
-			if err != nil {
-				sm.Error(&diam.ErrorReport{
-					Conn:    conn,
-					Message: answer,
-					Error:   err,
-				})
-			}
-			return err
-		})(c, a)
+		_, err = a.WriteTo(c)
+		if err != nil {
+			sm.Error(&diam.ErrorReport{
+				Conn:    c,
+				Message: m,
+				Error:   err,
+			})
+		}
 	}
 }

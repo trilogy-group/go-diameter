@@ -109,13 +109,11 @@ func errorCEA(sm *StateMachine, c diam.Conn, m *diam.Message, cer *smparser.CER,
 		sm.cfg.OnCEA(c, a)
 	}
 
-	return sm.cfg.AnswerHandlerProxy(func(conn diam.Conn, answer *diam.Message) error {
-		_, err = answer.WriteTo(conn)
-		if err != nil {
-			err = fmt.Errorf("Error CEA '%s' send failure: %v", errMessage, err)
-		}
-		return err
-	})(c, a)
+	_, err = a.WriteTo(c)
+	if err != nil {
+		err = fmt.Errorf("Error CEA '%s' send failure: %v", errMessage, err)
+	}
+	return err
 }
 
 // successCEA sends a success answer indicating that the CER was successfully
@@ -183,10 +181,8 @@ func successCEA(sm *StateMachine, c diam.Conn, m *diam.Message, cer *smparser.CE
 		sm.cfg.OnCEA(c, a)
 	}
 
-	return sm.cfg.AnswerHandlerProxy(func(conn diam.Conn, answer *diam.Message) error {
-		_, err = answer.WriteTo(conn)
-		return err
-	})(c, a)
+	_, err = a.WriteTo(c)
+	return err
 }
 
 // ceaAdvertisedApps is the set of applications this adapter supports and

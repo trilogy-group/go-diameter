@@ -38,13 +38,6 @@ func PrepareSupportedApps(d *dict.Parser) []*SupportedApp {
 	return locallySupportedApps
 }
 
-type HandlerFuncProxy = func(diam.Conn, *diam.Message) error
-type MessageHandlerProxy = func(HandlerFuncProxy) HandlerFuncProxy
-
-var defaultHandlerFuncProxy = func(f HandlerFuncProxy) HandlerFuncProxy {
-	return f
-}
-
 // Settings used to configure the state machine with AVPs to be added
 // to CER on clients or CEA on servers.
 type Settings struct {
@@ -80,13 +73,6 @@ type Settings struct {
 	//
 	// Deprecated: HostIPAddress is depreciated, use HostIPAddresses instead
 	HostIPAddress datatype.Address
-
-	// RequestHandlerProxy and AnswerHandlerProxy wrap the CER/DWR request
-	// handlers and the client-side answer handlers respectively, allowing
-	// ccab to trace/observe the handshake. If nil, a pass-through proxy is
-	// used (no behavioral change).
-	RequestHandlerProxy MessageHandlerProxy
-	AnswerHandlerProxy  MessageHandlerProxy
 
 	// Dict is an optional dictionary parser. If nil, dict.Default is used.
 	Dict *dict.Parser
@@ -145,12 +131,6 @@ func New(settings *Settings) *StateMachine {
 	if len(settings.HostIPAddresses) == 0 && len(settings.HostIPAddress) > 0 {
 		settings.HostIPAddresses = []datatype.Address{settings.HostIPAddress}
 	}
-	if settings.RequestHandlerProxy == nil {
-		settings.RequestHandlerProxy = defaultHandlerFuncProxy
-	}
-	if settings.AnswerHandlerProxy == nil {
-		settings.AnswerHandlerProxy = defaultHandlerFuncProxy
-	}
 	dp := settings.Dict
 	if dp == nil {
 		dp = dict.Default
@@ -161,24 +141,8 @@ func New(settings *Settings) *StateMachine {
 		hsNotifyc:     make(chan diam.Conn, 1000),
 		supportedApps: PrepareSupportedApps(dp),
 	}
-	// Compose both mechanisms: the ccab RequestHandlerProxy wraps the base
-	// handshake handler (tracing), and the fiorix OnCER/OnDWR pre-hook fires
-	// before the proxied handler. Both are pass-through/nil by default, so
-	// the default behavior is unchanged.
-	var cerHandlerProxy diam.HandlerFunc = func(c diam.Conn, m *diam.Message) {
-		_ = settings.RequestHandlerProxy(func(c diam.Conn, m *diam.Message) error {
-			handleCER(sm)(c, m)
-			return nil
-		})(c, m)
-	}
-	var dwrHandlerProxy diam.HandlerFunc = func(c diam.Conn, m *diam.Message) {
-		_ = settings.RequestHandlerProxy(func(c diam.Conn, m *diam.Message) error {
-			handleDWR(sm)(c, m)
-			return nil
-		})(c, m)
-	}
-	cerHandler := chainPreHook(settings.OnCER, cerHandlerProxy)
-	dwrHandler := chainPreHook(settings.OnDWR, dwrHandlerProxy)
+	cerHandler := chainPreHook(settings.OnCER, handleCER(sm))
+	dwrHandler := chainPreHook(settings.OnDWR, handleDWR(sm))
 	sm.mux.Handle("CER", cerHandler)
 	sm.mux.Handle("DWR", handshakeOK(dwrHandler))
 	sm.mux.HandleIdx(baseCERIdx, cerHandler)
