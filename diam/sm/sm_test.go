@@ -103,7 +103,7 @@ func testStateMachine(t *testing.T, network string, settings *Settings) {
 
 		expectedCea := strings.TrimSpace(fmt.Sprintf(`
 Capabilities-Exchange-Answer (CEA)
-{Code:257,Flags:0x0,Version:0x1,Length:316,ApplicationId:1001,HopByHopId:0x%x,EndToEndId:0x%x}
+{Code:257,Flags:0x0,Version:0x1,Length:272,ApplicationId:1001,HopByHopId:0x%x,EndToEndId:0x%x}
 	Result-Code {Code:268,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{2001}}
 	Origin-Host {Code:264,Flags:0x40,Length:12,VendorId:0,Value:DiameterIdentity{srv},Padding:1}
 	Origin-Realm {Code:296,Flags:0x40,Length:12,VendorId:0,Value:DiameterIdentity{test},Padding:0}
@@ -126,11 +126,6 @@ Capabilities-Exchange-Answer (CEA)
 	Vendor-Specific-Application-Id {Code:260,Flags:0x40,Length:32,VendorId:0,Value:Grouped{
 		Vendor-Id {Code:266,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{10415}},
 		Auth-Application-Id {Code:258,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{16777236}},
-	}}
-	Supported-Vendor-Id {Code:265,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{10415}}
-	Vendor-Specific-Application-Id {Code:260,Flags:0x40,Length:32,VendorId:0,Value:Grouped{
-		Vendor-Id {Code:266,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{10415}},
-		Auth-Application-Id {Code:258,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{16777302}},
 	}}
 	Firmware-Revision {Code:267,Flags:0x0,Length:12,VendorId:0,Value:Unsigned32{1}}
 

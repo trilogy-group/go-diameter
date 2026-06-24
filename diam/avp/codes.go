@@ -508,8 +508,6 @@ const (
 	PDPContext                                 = 1469
 	PDPContextType                             = 1247
 	PDPType                                    = 1470
-	PendingPolicyCounterChangeTime             = 2901
-	PendingPolicyCounterInformation            = 2905
 	PLMNClient                                 = 1482
 	PoCChangeCondition                         = 1261
 	PoCChangeTime                              = 1262
@@ -524,9 +522,6 @@ const (
 	PoCUserRole                                = 1252
 	PoCUserRoleIDs                             = 1253
 	PoCUserRoleinfoUnits                       = 1254
-	PolicyCounterIdentifier                    = 2901
-	PolicyCounterStatus                        = 2902
-	PolicyCounterStatusReport                  = 2903
 	PortLimit                                  = 62
 	PositioningData                            = 1245
 	Precedence                                 = 1010

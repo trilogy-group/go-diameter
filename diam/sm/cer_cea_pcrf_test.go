@@ -112,9 +112,8 @@ func exchangeCER(t *testing.T, settings *Settings, appIDs ...uint32) *diam.Messa
 }
 
 // TestCEA_AdvertisesOnlySupportedApps verifies that the CEA advertises only the
-// four applications this adapter supports (Gy, Rx, Gx, Sy), even though the
-// loaded dictionary contains more applications (NASREQ, Base Accounting, S6a,
-// SWx).
+// applications this adapter supports (Gy, Rx, Gx), even though the loaded
+// dictionary contains more applications (NASREQ, Base Accounting, S6a, SWx).
 func TestCEA_AdvertisesOnlySupportedApps(t *testing.T) {
 	cea := exchangeCER(t, pcrfServerSettings, diam.GX_CHARGING_CONTROL_APP_ID)
 	if !testResultCode(cea, diam.Success) {
@@ -126,7 +125,6 @@ func TestCEA_AdvertisesOnlySupportedApps(t *testing.T) {
 		diam.CHARGING_CONTROL_APP_ID:    true,
 		diam.RX_APP_ID:                  true,
 		diam.GX_CHARGING_CONTROL_APP_ID: true,
-		diam.DIAMETER_SY_APP_ID:         true,
 	}
 	for id := range want {
 		if !got[id] {
@@ -156,7 +154,6 @@ func TestCEA_PcrfIdentitySelection(t *testing.T) {
 		{"rx only", []uint32{diam.RX_APP_ID}, "pcrf.example.com", "pcrf-realm.example.com"},
 		{"gx and rx", []uint32{diam.GX_CHARGING_CONTROL_APP_ID, diam.RX_APP_ID}, "pcrf.example.com", "pcrf-realm.example.com"},
 		{"gy only", []uint32{diam.CHARGING_CONTROL_APP_ID}, "ocs.example.com", "ocs-realm.example.com"},
-		{"sy only", []uint32{diam.DIAMETER_SY_APP_ID}, "ocs.example.com", "ocs-realm.example.com"},
 		{"gx and gy", []uint32{diam.GX_CHARGING_CONTROL_APP_ID, diam.CHARGING_CONTROL_APP_ID}, "ocs.example.com", "ocs-realm.example.com"},
 	}
 

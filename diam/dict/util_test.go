@@ -11,8 +11,8 @@ import (
 
 func TestApps(t *testing.T) {
 	apps := Default.Apps()
-	if len(apps) != 11 {
-		t.Fatalf("Unexpected # of apps. Want 11, have %d", len(apps))
+	if len(apps) != 10 {
+		t.Fatalf("Unexpected # of apps. Want 10, have %d", len(apps))
 	}
 	// Base protocol.
 	if apps[0].ID != 0 {
@@ -49,10 +49,6 @@ func TestApps(t *testing.T) {
 	// 3GPP Swx applications
 	if apps[9].ID != 16777265 {
 		t.Fatalf("Unexpected app.ID. Want 16777265, have %d", apps[9].ID)
-	}
-	// Diameter Sy
-	if apps[10].ID != 16777302 {
-		t.Fatalf("Unexpected app.ID. Want 16777302, have %d", apps[10].ID)
 	}
 }
 
