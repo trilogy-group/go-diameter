@@ -22,7 +22,9 @@ if [ -z "$SED" ]; then
 fi
 
 if [ -z "$SORT_FLAG_IGNORE_CASE" ]; then
-	SORT_FLAG_IGNORE_CASE="-f"
+	if [ "$os" = "Darwin" ]; then
+		SORT_FLAG_IGNORE_CASE="-f"
+	fi
 fi
 
 dict=dict/testdata/*.xml
@@ -102,7 +104,6 @@ cat $dict | "$SED" \
 	-e 's/-Id\([-"s]\)/-ID\1/g' \
 	-e 's/-//g' \
 	-ne 's/.*avp name="\(.*\)" code="\([0-9]*\)".*/\1 = \2/p' \
-	| "$SED" -e 's/^5G/FiveG/' \
 	| "$SED" -e 's/^[0-9]/X&/' \
 	| LC_COLLATE=C sort -u $SORT_FLAG_IGNORE_CASE >> $src
 

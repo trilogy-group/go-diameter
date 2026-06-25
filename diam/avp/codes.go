@@ -244,9 +244,6 @@ const (
 	FinalUnitAction                            = 449
 	FinalUnitIndication                        = 430
 	FirmwareRevision                           = 267
-	FiveGMMCause                               = 573
-	FiveGSMCause                               = 574
-	FiveGSRANNASReleaseCause                   = 572
 	FixedUserLocationInfo                      = 2825
 	FlowDescription                            = 507
 	FlowDirection                              = 1080
@@ -816,5 +813,8 @@ const (
 	VPLMNDynamicAddressAllowed                 = 1432
 	VPLMNLIPAAllowed                           = 1617
 	WirelineUserLocationInfo                   = 578
+	X5GMMCause                                 = 573
+	X5GSMCause                                 = 574
+	X5GSRANNASReleaseCause                     = 572
 	XRES                                       = 1448
 )

@@ -46,7 +46,6 @@ func TestApps(t *testing.T) {
 	if apps[8].ID != 16777252 {
 		t.Fatalf("Unexpected app.ID. Want 16777252, have %d", apps[8].ID)
 	}
-	// 3GPP Swx applications
 	if apps[9].ID != 16777265 {
 		t.Fatalf("Unexpected app.ID. Want 16777265, have %d", apps[9].ID)
 	}
