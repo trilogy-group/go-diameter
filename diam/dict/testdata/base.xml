@@ -522,10 +522,6 @@
 			</data>
 		</avp>
 
-        <avp name="Provider-Id" code="10001" must="M" may="P" must-not="V" may-encrypt="-">
-			<data type="OctetString"/>
-		</avp>
-
 
 	</application>
 	<application id="3" type="acct" name="Base Accounting"> <!-- Diameter Base Accounting Messages -->

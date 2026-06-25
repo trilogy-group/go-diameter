@@ -564,10 +564,6 @@ var baseXML = `<?xml version="1.0" encoding="UTF-8"?>
 			</data>
 		</avp>
 
-        <avp name="Provider-Id" code="10001" must="M" may="P" must-not="V" may-encrypt="-">
-			<data type="OctetString"/>
-		</avp>
-
 
 	</application>
 	<application id="3" type="acct" name="Base Accounting"> <!-- Diameter Base Accounting Messages -->
