@@ -14,7 +14,6 @@ const (
 	AccessNetworkChargingIdentifier            = 502
 	AccessNetworkChargingIdentifierGx          = 1022
 	AccessNetworkChargingIdentifierValue       = 503
-	AccessNetworkInfoChange                    = 4401
 	AccessNetworkInformation                   = 1263
 	AccessRestrictionData                      = 1426
 	AccessTransferInformation                  = 2709
@@ -60,8 +59,6 @@ const (
 	AMBR                                       = 1435
 	ANGWAddress                                = 1050
 	ANID                                       = 1504
-	AnnouncementIdentifier                     = 3905
-	AnnouncementInformation                    = 3904
 	ANTrusted                                  = 1503
 	AoCCostInformation                         = 2053
 	AoCFormat                                  = 2310
@@ -104,7 +101,6 @@ const (
 	BaseTimeInterval                           = 1265
 	BasicServiceCode                           = 3411
 	BearerCapability                           = 3412
-	BearerControlMode                          = 1023
 	BearerIdentifier                           = 1020
 	BearerService                              = 854
 	BearerUsage                                = 1000
@@ -113,8 +109,6 @@ const (
 	CallbackNumber                             = 19
 	CallBarringInfo                            = 1488
 	CalledAssertedIdentity                     = 1250
-	CalledIdentity                             = 3916
-	CalledIdentityChange                       = 3917
 	CalledPartyAddress                         = 832
 	CalledStationID                            = 30
 	CalleeInformation                          = 565
@@ -135,7 +129,6 @@ const (
 	CCTime                                     = 420
 	CCTotalOctets                              = 421
 	CCUnitType                                 = 454
-	CellularNetworkInformation                 = 3924
 	CGAddress                                  = 846
 	ChangeCondition                            = 2037
 	ChangeTime                                 = 2038
@@ -152,7 +145,6 @@ const (
 	ChargingRuleInstall                        = 1001
 	ChargingRuleName                           = 1005
 	ChargingRuleRemove                         = 1002
-	ChargingRuleReport                         = 1018
 	CheckBalanceResult                         = 422
 	Class                                      = 25
 	ClassIdentifier                            = 1214
@@ -179,7 +171,6 @@ const (
 	CostUnit                                   = 424
 	CreditControl                              = 426
 	CreditControlFailureHandling               = 427
-	CreditManagementStatus                     = 1082
 	CSGAccessMode                              = 2317
 	CSGID                                      = 1437
 	CSGMembershipIndication                    = 2318
@@ -248,7 +239,6 @@ const (
 	FailedAVP                                  = 279
 	FeatureList                                = 630
 	FeatureListID                              = 629
-	FEIdentifierList                           = 4413
 	FileRepairSupported                        = 1224
 	FilterID                                   = 11
 	FinalUnitAction                            = 449
@@ -327,8 +317,6 @@ const (
 	InterfaceText                              = 2005
 	InterfaceType                              = 2006
 	InterOperatorIdentifier                    = 838
-	InterUETransfer                            = 3902
-	IPCANSessionChargingScope                  = 2827
 	IPCANType                                  = 1027
 	IPDomainID                                 = 537
 	IPRealmDefaultIndication                   = 2603
@@ -490,16 +478,13 @@ const (
 	OriginStateID                              = 278
 	OutgoingSessionID                          = 2320
 	OutgoingTrunkGroupID                       = 853
-	PacketFilterContent                        = 1059
 	PacketFilterIdentifier                     = 1060
-	PacketFilterInformation                    = 1061
 	PacketFilterUsage                          = 1072
 	ParticipantAccessPriority                  = 1259
 	ParticipantActionType                      = 2049
 	ParticipantGroup                           = 1260
 	ParticipantsInvolved                       = 887
 	PasswordRetry                              = 75
-	PCCRuleStatus                              = 1019
 	PDNConnectionChargingID                    = 2050
 	PDNGWAllocationType                        = 1438
 	PDNType                                    = 1456
@@ -616,7 +601,6 @@ const (
 	RSBandwidth                                = 522
 	RuleActivationTime                         = 1043
 	RuleDeactivationTime                       = 1044
-	RuleFailureCode                            = 1031
 	RxRequestType                              = 533
 	ScaleFactor                                = 2059
 	SDPAnswerTimestamp                         = 1275
@@ -746,13 +730,11 @@ const (
 	TGPPMSTimeZone                             = 23
 	TGPPNSAPI                                  = 10
 	TGPPPDPType                                = 3
-	TGPPPSDataOffStatus                        = 2847
 	TGPPRATType                                = 21
 	TGPPSelectionMode                          = 12
 	TGPPServiceType                            = 1483
 	TGPPSessionStopIndicator                   = 11
 	TGPPSGSNAddress                            = 6
-	TGPPSGSNIPv6Address                        = 15
 	TGPPSGSNMCCMNC                             = 18
 	TGPPUserLocationInfo                       = 22
 	TimeFirstUsage                             = 2043

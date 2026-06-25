@@ -1459,15 +1459,6 @@ var gxcreditcontrolXML = `<?xml version="1.0" encoding="UTF-8"?>
             </data>
         </avp>
 
-        <avp name="Bearer-Control-Mode" code="1023" must="M,V" may="P" may-encrypt="y" vendor-id="10415">
-            <!-- 3GPP 29.212 Section 5.3.23 -->
-            <data type="Enumerated">
-                <item code="0" name="UE_only"/>
-                <item code="1" name="RESERVED"/>
-                <item code="2" name="UE_NW"/>
-            </data>
-        </avp>
-
         <avp name="TGPP-SGSN-Address" code="6" must="V" may="P" must-not="M" may-encrypt="y" vendor-id="10415">
             <!-- 3GPP 29.061 Table 9a -->
             <data type="OctetString"/>
@@ -1505,115 +1496,6 @@ var gxcreditcontrolXML = `<?xml version="1.0" encoding="UTF-8"?>
                 <!-- *[ AVP ]-->
             </data>
         </avp>
-
-        <avp name="TGPP-SGSN-IPv6-Address" code="15" must="V" may="P" may-encrypt="Y" vendor-id="10415">
-			<!-- 3GPP TS 29.061 -->
-			<data type="OctetString"/>
-		</avp>
-
-		<avp name="TGPP-PS-Data-Off-Status" code="2847" must="V" may="P" may-encrypt="Y" vendor-id="10415">
-			<!-- 3GPP TS 29.212 5.3.133 -->
-			<data type="Enumerated">
-				<item code="0" name="ACTIVE"/>
-				<item code="1" name="INACTIVE"/>
-			</data>
-		</avp>
-
-		<avp name="Credit-Management-Status" code="1082" must="V" may="P" may-encrypt="Y" vendor-id="10415">
-			<!-- 3GPP TS 29.212 5.3.102 -->
-			<data type="Unsigned32"/>
-		</avp>
-
-		<avp name="Packet-Filter-Information" code="1061" must="V" may="P" may-encrypt="Y" vendor-id="10415">
-			<!-- 3GPP TS 29.212 5.3.56 -->
-			<data type="Grouped"/>
-			<grouped>
-                <rule avp="Packet-Filter-Identifier" required="false" max="1"/>
-                <rule avp="Precedence" required="false" max="1"/>
-                <rule avp="Packet-Filter-Content" required="false" max="1"/>
-                <rule avp="ToS-Traffic-Class" required="false" max="1"/>
-                <rule avp="Security-Parameter-Index" required="false" max="1"/>
-                <rule avp="Flow-Label" required="false" max="1"/>
-                <rule avp="Flow-Direction" required="false" max="1"/>
-                <!-- *[ AVP ]-->
-			</grouped>
-		</avp>
-
-		<avp name="Packet-Filter-Content" code="1059" must="V" may="P" may-encrypt="Y" vendor-id="10415">
-			<!-- 3GPP TS 29.212 5.3.54 -->
-			<data type="IPFilterRule"/>
-		</avp>
-
-		<avp name="Charging-Rule-Report" code="1018" must="M,V" may="P" may-encrypt="Y" vendor-id="10415">
-			<!-- 3GPP TS 29.212 5.3.18 -->
-			<data type="Grouped"/>
-			<grouped>
-                <rule avp="Charging-Rule-Name" required="false"/>
-                <rule avp="Charging-Rule-Base-Name" required="false"/>
-                <rule avp="Bearer-Identifier" required="false" max="1"/>
-                <rule avp="PCC-Rule-Status" required="false" max="1"/>
-                <rule avp="Rule-Failure-Code" required="false" max="1"/>
-                <rule avp="Final-Unit-Indication" required="false" max="1"/>
-                <rule avp="RAN-NAS-Release-Cause" required="false"/>
-                <rule avp="Content-Version" required="false"/>
-			</grouped>
-		</avp>
-
-		<avp name="PCC-Rule-Status" code="1019" must="M,V" may="P" may-encrypt="Y" vendor-id="10415">
-			<!-- 3GPP TS 29.212 5.3.19 -->
-			<data type="Enumerated">
-				<item code="0" name="ACTIVE"/>
-				<item code="1" name="INACTIVE"/>
-				<item code="2" name="TEMPORARILY_INACTIVE"/>
-			</data>
-		</avp>
-
-		<avp name="Rule-Failure-Code" code="1031" must="M,V" may="P" may-encrypt="Y" vendor-id="10415">
-			<!-- 3GPP TS 29.212 5.3.38 -->
-			<data type="Enumerated">
-				<item code="1" name="UNKNOWN_RULE_NAME"/>
-				<item code="2" name="RATING_GROUP_ERROR"/>
-				<item code="3" name="SERVICE_IDENTIFIER_ERROR"/>
-				<item code="4" name="GW/PCEF_MALFUNCTION"/>
-				<item code="5" name="RESOURCES_LIMITATION"/>
-				<item code="6" name="MAX_NR_BEARERS_REACHED"/>
-				<item code="7" name="UNKNOWN_BEARER_ID"/>
-				<item code="8" name="MISSING_BEARER_ID"/>
-				<item code="9" name="MISSING_FLOW_INFORMATION"/>
-				<item code="10" name="RESOURCE_ALLOCATION_FAILURE"/>
-				<item code="11" name="UNSUCCESSFUL_QOS_VALIDATION"/>
-				<item code="12" name="INCORRECT_FLOW_INFORMATION"/>
-				<item code="13" name="PS_TO_CS_HANDOVER"/>
-				<item code="14" name="TDF_APPLICATION_IDENTIFIER_ERROR"/>
-				<item code="15" name="NO_BEARER_BOUND"/>
-				<item code="16" name="FILTER_RESTRICTIONS"/>
-				<item code="17" name="AN_GW_FAILED"/>
-				<item code="18" name="MISSING_REDIRECT_SERVER_ADDRESS"/>
-				<item code="19" name="CM_END_USER_SERVICE_DENIED"/>
-				<item code="20" name="CM_CREDIT_CONTROL_NOT_APPLICABLE"/>
-				<item code="21" name="CM_AUTHORIZATION_REJECTED"/>
-				<item code="22" name="CM_USER_UNKNOWN"/>
-				<item code="23" name="CM_RATING_FAILED"/>
-				<item code="24" name="ROUTING_RULE_REJECTION"/>
-				<item code="25" name="UNKNOWN_ROUTING_ACCESS_INFORMATION"/>
-				<item code="26" name="NO_NBIFOM_SUPPORT"/>
-				<item code="27" name="UE_STATE_SUSPEND"/>
-				<item code="28" name="TRAFFIC_STEERING_ERROR"/>
-				<item code="29" name="SAME_TIME_ERROR"/>
-			</data>
-		</avp>
-
-		<avp name="IP-CAN-Session-Charging-Scope" code="2827" must="V" may="P" may-encrypt="Y" vendor-id="10415">
-			<!-- 3GPP TS 29.212 5.3.114 -->
-			<data type="Enumerated">
-				<item code="0" name="IP-CAN_SESSION_SCOPE"/>
-			</data>
-		</avp>
-
-        <avp name="Content-Version" code="552" must="V" may="P" must-not="M" may-encrypt="Y" vendor-id="10415">
-			<!-- 3GPP TS 29.214 5.3.49 -->
-			<data type="Unsigned64"/>
-		</avp>
 
     </application>
 </diameter>`
@@ -3270,7 +3152,7 @@ var tgpprorfXML = `<?xml version="1.0" encoding="UTF-8"?>
 				<rule avp="SDP-Media-Component" required="false"/>
 				<rule avp="Served-Party-IP-Address" required="false" max="1"/>
 				<rule avp="Server-Capabilities" required="false" max="1"/>
-				<rule avp="Trunk-Group-ID" required="false" max="1"/>
+				<rule avp="Trunk-Group-Id" required="false" max="1"/>
 				<rule avp="Bearer-Service" required="false" max="1"/>
 				<rule avp="Service-Id" required="false" max="1"/>
 				<rule avp="Service-Specific-Info" required="false"/>
@@ -3296,8 +3178,6 @@ var tgpprorfXML = `<?xml version="1.0" encoding="UTF-8"?>
 				<rule avp="Route-Header-Transmitted" required="false" max="1"/>
 				<rule avp="Instance-Id" required="false" max="1"/>
 				<rule avp="TAD-Identifier" required="false" max="1"/>
-				<rule avp="FE-Identifier-List" required="false" max="1"/>
-				<rule avp="Cellular-Network-Information" required="false" max="1"/>
 			</data>
 		</avp>
 
@@ -3312,7 +3192,7 @@ var tgpprorfXML = `<?xml version="1.0" encoding="UTF-8"?>
 			</data>
 		</avp>
 
-		<avp name="Incoming-Trunk-Group-ID" code="852" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
+		<avp name="Incoming-Trunk-Group-Id" code="852" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
 			<data type="UTF8String"/>
 		</avp>
 
@@ -3884,7 +3764,7 @@ var tgpprorfXML = `<?xml version="1.0" encoding="UTF-8"?>
 			<data type="UTF8String"/>
 		</avp>
 
-		<avp name="Outgoing-Trunk-Group-ID" code="853" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
+		<avp name="Outgoing-Trunk-Group-Id" code="853" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
 			<data type="UTF8String"/>
 		</avp>
 
@@ -4775,14 +4655,6 @@ var tgpprorfXML = `<?xml version="1.0" encoding="UTF-8"?>
 			</data>
 		</avp>
 
-		<avp name="FE-Identifier-List" code="4413" must="V,M"	may="-" must-not="-" may-encrypt="N" vendor-id="10415">
-			<data type="UTF8String"/>
-		</avp>
-
-		<avp name="Cellular-Network-Information" code="3924" must="V,M" may="-" must-not="-" may-encrypt="N" vendor-id="10415">
-			<data type="OctetString"/>
-		</avp>
-
 		<avp name="Talk-Burst-Exchange" code="1255" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
 			<data type="Grouped">
 				<rule avp="PoC-Change-Time" required="true" max="1"/>
@@ -4974,10 +4846,10 @@ var tgpprorfXML = `<?xml version="1.0" encoding="UTF-8"?>
 			</data>
 		</avp>
 
-		<avp name="Trunk-Group-ID" code="851" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
+		<avp name="Trunk-Group-Id" code="851" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
 			<data type="Grouped">
-				<rule avp="Incoming-Trunk-Group-ID" required="false" max="1"/>
-				<rule avp="Outgoing-Trunk-Group-ID" required="false" max="1"/>
+				<rule avp="Incoming-Trunk-Group-Id" required="false" max="1"/>
+				<rule avp="Outgoing-Trunk-Group-Id" required="false" max="1"/>
 			</data>
 		</avp>
 
@@ -5102,48 +4974,6 @@ var tgpprorfXML = `<?xml version="1.0" encoding="UTF-8"?>
 
     <avp name="Extended-APN-AMBR-UL" code="2849" must="V" must-not="M" may="P" may-encrypt="Y" vendor-id="10415">
       <data type="Unsigned32"/>
-    </avp>
-
-    <!--
-      ccab fork additions, backported from the previously hand-edited dict/default.go
-      into this source XML so that autogen.sh regenerates default.go losslessly.
-      See 3GPP TS 32.299 (Announcement-*, Called-Identity*, Inter-UE-Transfer,
-      Access-Network-Info-Change).
-    -->
-    <avp name="Announcement-Information" code="3904" must="M" may="P" must-not="V" may-encrypt="Y">
-      <data type="Grouped">
-        <rule avp="Announcement-Identifier" required="true" max="1"/>
-      </data>
-    </avp>
-
-    <avp name="Announcement-Identifier" code="3905" must="M" may="P" must-not="V" may-encrypt="Y">
-      <data type="Unsigned32"/>
-    </avp>
-
-    <avp name="Called-Identity" code="3916" must="V,M" may-encrypt="N" vendor-id="10415">
-      <data type="UTF8String"/>
-    </avp>
-
-    <avp name="Called-Identity-Change" code="3917" must="V,M" may-encrypt="N" vendor-id="10415">
-      <data type="Grouped">
-        <rule avp="Called-Identity" required="false" max="1"/>
-        <rule avp="Change-Time" required="false" max="1"/>
-      </data>
-    </avp>
-
-    <avp name="Access-Network-Info-Change" code="4401" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
-      <data type="Grouped">
-        <rule avp="Access-Network-Information" required="false" max="1"/>
-        <rule avp="Cellular-Network-Information" required="false" max="1"/>
-        <rule avp="Change-Time" required="false" max="1"/>
-      </data>
-    </avp>
-
-    <avp name="Inter-UE-Transfer" code="3902" must="V,M" may="-" must-not="-" may-encrypt="N" vendor-id="10415">
-      <data type="Enumerated">
-        <item code="0" name="Intra-UE transfer"/>
-        <item code="1" name="Inter-UE transfer"/>
-      </data>
     </avp>
 
 	</application>

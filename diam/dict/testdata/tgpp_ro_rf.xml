@@ -686,7 +686,7 @@
 				<rule avp="SDP-Media-Component" required="false"/>
 				<rule avp="Served-Party-IP-Address" required="false" max="1"/>
 				<rule avp="Server-Capabilities" required="false" max="1"/>
-				<rule avp="Trunk-Group-ID" required="false" max="1"/>
+				<rule avp="Trunk-Group-Id" required="false" max="1"/>
 				<rule avp="Bearer-Service" required="false" max="1"/>
 				<rule avp="Service-Id" required="false" max="1"/>
 				<rule avp="Service-Specific-Info" required="false"/>
@@ -712,8 +712,6 @@
 				<rule avp="Route-Header-Transmitted" required="false" max="1"/>
 				<rule avp="Instance-Id" required="false" max="1"/>
 				<rule avp="TAD-Identifier" required="false" max="1"/>
-				<rule avp="FE-Identifier-List" required="false" max="1"/>
-				<rule avp="Cellular-Network-Information" required="false" max="1"/>
 			</data>
 		</avp>
 
@@ -728,7 +726,7 @@
 			</data>
 		</avp>
 
-		<avp name="Incoming-Trunk-Group-ID" code="852" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
+		<avp name="Incoming-Trunk-Group-Id" code="852" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
 			<data type="UTF8String"/>
 		</avp>
 
@@ -1300,7 +1298,7 @@
 			<data type="UTF8String"/>
 		</avp>
 
-		<avp name="Outgoing-Trunk-Group-ID" code="853" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
+		<avp name="Outgoing-Trunk-Group-Id" code="853" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
 			<data type="UTF8String"/>
 		</avp>
 
@@ -2191,14 +2189,6 @@
 			</data>
 		</avp>
 
-		<avp name="FE-Identifier-List" code="4413" must="V,M"	may="-" must-not="-" may-encrypt="N" vendor-id="10415">
-			<data type="UTF8String"/>
-		</avp>
-
-		<avp name="Cellular-Network-Information" code="3924" must="V,M" may="-" must-not="-" may-encrypt="N" vendor-id="10415">
-			<data type="OctetString"/>
-		</avp>
-
 		<avp name="Talk-Burst-Exchange" code="1255" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
 			<data type="Grouped">
 				<rule avp="PoC-Change-Time" required="true" max="1"/>
@@ -2390,10 +2380,10 @@
 			</data>
 		</avp>
 
-		<avp name="Trunk-Group-ID" code="851" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
+		<avp name="Trunk-Group-Id" code="851" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
 			<data type="Grouped">
-				<rule avp="Incoming-Trunk-Group-ID" required="false" max="1"/>
-				<rule avp="Outgoing-Trunk-Group-ID" required="false" max="1"/>
+				<rule avp="Incoming-Trunk-Group-Id" required="false" max="1"/>
+				<rule avp="Outgoing-Trunk-Group-Id" required="false" max="1"/>
 			</data>
 		</avp>
 
@@ -2518,48 +2508,6 @@
 
     <avp name="Extended-APN-AMBR-UL" code="2849" must="V" must-not="M" may="P" may-encrypt="Y" vendor-id="10415">
       <data type="Unsigned32"/>
-    </avp>
-
-    <!--
-      ccab fork additions, backported from the previously hand-edited dict/default.go
-      into this source XML so that autogen.sh regenerates default.go losslessly.
-      See 3GPP TS 32.299 (Announcement-*, Called-Identity*, Inter-UE-Transfer,
-      Access-Network-Info-Change).
-    -->
-    <avp name="Announcement-Information" code="3904" must="M" may="P" must-not="V" may-encrypt="Y">
-      <data type="Grouped">
-        <rule avp="Announcement-Identifier" required="true" max="1"/>
-      </data>
-    </avp>
-
-    <avp name="Announcement-Identifier" code="3905" must="M" may="P" must-not="V" may-encrypt="Y">
-      <data type="Unsigned32"/>
-    </avp>
-
-    <avp name="Called-Identity" code="3916" must="V,M" may-encrypt="N" vendor-id="10415">
-      <data type="UTF8String"/>
-    </avp>
-
-    <avp name="Called-Identity-Change" code="3917" must="V,M" may-encrypt="N" vendor-id="10415">
-      <data type="Grouped">
-        <rule avp="Called-Identity" required="false" max="1"/>
-        <rule avp="Change-Time" required="false" max="1"/>
-      </data>
-    </avp>
-
-    <avp name="Access-Network-Info-Change" code="4401" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
-      <data type="Grouped">
-        <rule avp="Access-Network-Information" required="false" max="1"/>
-        <rule avp="Cellular-Network-Information" required="false" max="1"/>
-        <rule avp="Change-Time" required="false" max="1"/>
-      </data>
-    </avp>
-
-    <avp name="Inter-UE-Transfer" code="3902" must="V,M" may="-" must-not="-" may-encrypt="N" vendor-id="10415">
-      <data type="Enumerated">
-        <item code="0" name="Intra-UE transfer"/>
-        <item code="1" name="Inter-UE transfer"/>
-      </data>
     </avp>
 
 	</application>
