@@ -136,12 +136,8 @@ func successCEA(sm *StateMachine, c diam.Conn, m *diam.Message, cer *smparser.CE
 	// Fix for Same H2H and E2E Identifier in success response
 	a.Header.HopByHopID = m.Header.HopByHopID
 	a.Header.EndToEndID = m.Header.EndToEndID
-	originHost, originRealm := sm.cfg.OriginHost, sm.cfg.OriginRealm
-	if len(sm.cfg.PcrfHost) > 0 && len(sm.cfg.PcrfRealm) > 0 && requestsOnlyPcrfApps(cer.Applications()) {
-		originHost, originRealm = sm.cfg.PcrfHost, sm.cfg.PcrfRealm
-	}
-	a.NewAVP(avp.OriginHost, avp.Mbit, 0, originHost)
-	a.NewAVP(avp.OriginRealm, avp.Mbit, 0, originRealm)
+	a.NewAVP(avp.OriginHost, avp.Mbit, 0, sm.cfg.OriginHost)
+	a.NewAVP(avp.OriginRealm, avp.Mbit, 0, sm.cfg.OriginRealm)
 	for _, hostAddress := range hostAddresses {
 		a.NewAVP(avp.HostIPAddress, avp.Mbit, 0, hostAddress)
 	}
@@ -180,18 +176,4 @@ func successCEA(sm *StateMachine, c diam.Conn, m *diam.Message, cer *smparser.CE
 
 	_, err = a.WriteTo(c)
 	return err
-}
-
-// requestsOnlyPcrfApps reports whether the CER requested applications and every
-// one of them is Gx or Rx.
-func requestsOnlyPcrfApps(requestedApps []uint32) bool {
-	if len(requestedApps) == 0 {
-		return false
-	}
-	for _, id := range requestedApps {
-		if id != diam.GX_CHARGING_CONTROL_APP_ID && id != diam.RX_APP_ID {
-			return false
-		}
-	}
-	return true
 }

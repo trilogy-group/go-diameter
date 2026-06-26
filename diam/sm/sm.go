@@ -46,11 +46,6 @@ type Settings struct {
 	VendorID    datatype.Unsigned32
 	ProductName datatype.UTF8String
 
-	// PcrfHost and PcrfRealm, when set, are advertised as Origin-Host/Origin-Realm
-	// in the CEA if the CER requests only Gx and/or Rx.
-	PcrfHost  datatype.DiameterIdentity
-	PcrfRealm datatype.DiameterIdentity
-
 	// OriginStateID is optional for clients, and not added if unset.
 	//
 	// On servers it has no effect because CEA will contain the
