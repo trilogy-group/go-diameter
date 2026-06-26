@@ -151,9 +151,6 @@ func successCEA(sm *StateMachine, c diam.Conn, m *diam.Message, cer *smparser.CE
 		a.AddAVP(cer.OriginStateID)
 	}
 	for _, app := range sm.supportedApps {
-		if !ceaAdvertisedApps[app.ID] {
-			continue
-		}
 		var typ uint32
 		switch app.AppType {
 		case "auth":
@@ -183,16 +180,6 @@ func successCEA(sm *StateMachine, c diam.Conn, m *diam.Message, cer *smparser.CE
 
 	_, err = a.WriteTo(c)
 	return err
-}
-
-// ceaAdvertisedApps is the set of applications this adapter supports and
-// therefore advertises in the CEA; every other application in the dictionary
-// is omitted.
-var ceaAdvertisedApps = map[uint32]bool{
-	diam.CHARGING_CONTROL_APP_ID:    true, // Gy
-	diam.RX_APP_ID:                  true, // Rx
-	diam.GX_CHARGING_CONTROL_APP_ID: true, // Gx
-	diam.DIAMETER_SY_APP_ID:         true, // Sy
 }
 
 // requestsOnlyPcrfApps reports whether the CER requested applications and every

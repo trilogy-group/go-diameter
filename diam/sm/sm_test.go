@@ -5,8 +5,6 @@
 package sm
 
 import (
-	"fmt"
-	"strings"
 	"testing"
 	"time"
 
@@ -32,15 +30,15 @@ func testResultCode(m *diam.Message, want uint32) bool {
 // sends a Re-Auth-Request message to ensure the handshake was
 // completed and that the RAR handler has context from the peer.
 func TestStateMachineTCP(t *testing.T) {
-	testStateMachine(t, "tcp", serverSettings)
+	testStateMachine(t, "tcp")
 }
 
-// / TestStateMachine establishes a connection with a test server and
+/// TestStateMachine establishes a connection with a test server and
 // sends a Re-Auth-Request message to ensure the handshake was
 // completed and that the RAR handler has context from the peer.
-func testStateMachine(t *testing.T, network string, settings *Settings) {
-	sm := New(settings)
-	if sm.Settings() != settings {
+func testStateMachine(t *testing.T, network string) {
+	sm := New(serverSettings)
+	if sm.Settings() != serverSettings {
 		t.Fatal("Invalid settings")
 	}
 	srv := diamtest.NewServerNetwork(network, sm, dict.Default)
@@ -100,42 +98,6 @@ func testStateMachine(t *testing.T, network string, settings *Settings) {
 		if !testResultCode(resp, diam.Success) {
 			t.Fatalf("Unexpected result code.\n%s", resp)
 		}
-
-		expectedCea := strings.TrimSpace(fmt.Sprintf(`
-Capabilities-Exchange-Answer (CEA)
-{Code:257,Flags:0x0,Version:0x1,Length:272,ApplicationId:1001,HopByHopId:0x%x,EndToEndId:0x%x}
-	Result-Code {Code:268,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{2001}}
-	Origin-Host {Code:264,Flags:0x40,Length:12,VendorId:0,Value:DiameterIdentity{srv},Padding:1}
-	Origin-Realm {Code:296,Flags:0x40,Length:12,VendorId:0,Value:DiameterIdentity{test},Padding:0}
-	Host-IP-Address {Code:257,Flags:0x40,Length:16,VendorId:0,Value:Address{127.0.0.1},Padding:2}
-	Vendor-Id {Code:266,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{13}}
-	Product-Name {Code:269,Flags:0x0,Length:20,VendorId:0,Value:UTF8String{go-diameter},Padding:1}
-	Origin-State-Id {Code:278,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{1}}
-	Auth-Application-Id {Code:258,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{4}}
-	Supported-Vendor-Id {Code:265,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{10415}}
-	Vendor-Specific-Application-Id {Code:260,Flags:0x40,Length:32,VendorId:0,Value:Grouped{
-		Vendor-Id {Code:266,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{10415}},
-		Auth-Application-Id {Code:258,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{16777238}},
-	}}
-	Supported-Vendor-Id {Code:265,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{10415}}
-	Vendor-Specific-Application-Id {Code:260,Flags:0x40,Length:32,VendorId:0,Value:Grouped{
-		Vendor-Id {Code:266,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{10415}},
-		Auth-Application-Id {Code:258,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{4}},
-	}}
-	Supported-Vendor-Id {Code:265,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{10415}}
-	Vendor-Specific-Application-Id {Code:260,Flags:0x40,Length:32,VendorId:0,Value:Grouped{
-		Vendor-Id {Code:266,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{10415}},
-		Auth-Application-Id {Code:258,Flags:0x40,Length:12,VendorId:0,Value:Unsigned32{16777236}},
-	}}
-	Firmware-Revision {Code:267,Flags:0x0,Length:12,VendorId:0,Value:Unsigned32{1}}
-
-			`, resp.Header.HopByHopID, resp.Header.EndToEndID))
-		actualCea := strings.TrimSpace(resp.String())
-
-		if expectedCea != actualCea {
-			t.Errorf("CEA is not as expected. Actual CEA: \n %s \n Expected CEA %s", actualCea, expectedCea)
-		}
-
 	case err := <-sm.ErrorReports():
 		t.Fatal(err)
 	case err := <-mux.ErrorReports():

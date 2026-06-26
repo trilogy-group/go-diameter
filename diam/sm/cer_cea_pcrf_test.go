@@ -28,31 +28,6 @@ var pcrfServerSettings = &Settings{
 	PcrfRealm:        "pcrf-realm.example.com",
 }
 
-// advertisedAppIDs collects every application id advertised in a CEA, both the
-// top-level Auth/Acct-Application-Id AVPs and the ones nested inside grouped
-// Vendor-Specific-Application-Id AVPs.
-func advertisedAppIDs(t *testing.T, m *diam.Message) map[uint32]bool {
-	t.Helper()
-	ids := map[uint32]bool{}
-	for _, a := range m.AVP {
-		switch a.Code {
-		case avp.AuthApplicationID, avp.AcctApplicationID:
-			ids[uint32(a.Data.(datatype.Unsigned32))] = true
-		case avp.VendorSpecificApplicationID:
-			grouped, ok := a.Data.(*diam.GroupedAVP)
-			if !ok {
-				continue
-			}
-			for _, inner := range grouped.AVP {
-				if inner.Code == avp.AuthApplicationID || inner.Code == avp.AcctApplicationID {
-					ids[uint32(inner.Data.(datatype.Unsigned32))] = true
-				}
-			}
-		}
-	}
-	return ids
-}
-
 // originIdentity returns the Origin-Host/Origin-Realm advertised in a CEA.
 func originIdentity(t *testing.T, m *diam.Message) (string, string) {
 	t.Helper()
@@ -109,36 +84,6 @@ func exchangeCER(t *testing.T, settings *Settings, appIDs ...uint32) *diam.Messa
 		t.Fatal("No CEA received")
 	}
 	return nil
-}
-
-// TestCEA_AdvertisesOnlySupportedApps verifies that the CEA advertises only the
-// applications this adapter supports (Gy, Rx, Gx), even though the loaded
-// dictionary contains more applications (NASREQ, Base Accounting, S6a, SWx).
-func TestCEA_AdvertisesOnlySupportedApps(t *testing.T) {
-	cea := exchangeCER(t, pcrfServerSettings, diam.GX_CHARGING_CONTROL_APP_ID)
-	if !testResultCode(cea, diam.Success) {
-		t.Fatalf("Unexpected result code.\n%s", cea)
-	}
-
-	got := advertisedAppIDs(t, cea)
-	want := map[uint32]bool{
-		diam.CHARGING_CONTROL_APP_ID:    true,
-		diam.RX_APP_ID:                  true,
-		diam.GX_CHARGING_CONTROL_APP_ID: true,
-	}
-	for id := range want {
-		if !got[id] {
-			t.Errorf("CEA missing supported application id %d", id)
-		}
-	}
-	for id := range got {
-		if !want[id] {
-			t.Errorf("CEA advertises unsupported application id %d", id)
-		}
-	}
-	if len(got) != len(want) {
-		t.Errorf("CEA advertised %d apps, want %d (%v)", len(got), len(want), got)
-	}
 }
 
 // TestCEA_PcrfIdentitySelection verifies the Origin-Host/Origin-Realm chosen in
